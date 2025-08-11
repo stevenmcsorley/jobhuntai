@@ -1,0 +1,39 @@
+/* Legacy styles for any remaining Bootstrap components */
+.modal-content {
+  background-color: rgb(255 255 255 / 0.9);
+  color: rgb(17 24 39);
+  backdrop-filter: blur(8px);
+  border-radius: 0.75rem;
+  border: 1px solid rgb(229 231 235 / 0.5);
+}
+
+[data-theme='dark'] .modal-content {
+  background-color: rgb(31 41 55 / 0.9);
+  color: rgb(243 244 246);
+  border: 1px solid rgb(75 85 99 / 0.5);
+}
+
+/* Job title and company name legacy styles */
+.job-title {
+  font-weight: 500;
+}
+
+.company-name {
+  color: #6b7280;
+}
+
+[data-theme='dark'] .company-name {
+  color: #9ca3af;
+}
+
+.time-ago {
+  cursor: help;
+}
+
+/* Truncation utility */
+.truncate {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

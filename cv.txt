@@ -1,0 +1,65 @@
+Steven McSorley
+Email: smcsorl@gmail.com | Phone: 07376490217
+Location: Ayr, Scotland
+GitHub: https://github.com/stevenmcsorley
+
+Personal Summary
+Experienced Front-End Developer with over 12 years delivering scalable, testable, and maintainable software across diverse environments. Adept in React, Node.js, TypeScript, and Vue, with a strong focus on BDD and clean code. Equally comfortable modernizing legacy codebases or contributing to greenfield projects. Proven ability to collaborate across teams, take ownership of internal tools, and deliver solutions that save time, money, and headaches.
+
+Professional Experience
+IPG Automotive (Remote – Birmingham)
+Senior Software Developer
+Aug 2024 – April 2025
+Joined a complex full-stack project without prior domain knowledge and quickly became productive by diagnosing and fixing bugs across a virtual vehicle testing application. Delivered enhancements using Remix, React, and MongoDB inside Docker containers. Contributed to feature development and test coverage with Vitest, while participating in daily standups and retros within an agile team.
+
+Liftango Ltd (Remote – Australia)
+Product Developer (Engineer)
+Jun 2023 – Jun 2024
+Worked across the stack on real-time transportation apps, writing APIs in Node.js and building features in React and React Native. Introduced BDD-style Cypress tests to document and test user journeys, improving clarity and maintainability across teams. Supported a legacy codebase while pushing forward new UX improvements through close collaboration with engineers.
+
+Equator, Glasgow
+Senior Front-End Developer
+May 2022 – Jun 2023
+Led frontend development for high-traffic commercial websites using React and Vanilla.js. Integrated GA4 event tracking at scale by creating a bespoke BDD test suite in Cypress — improving communication between development and analytics teams across multiple projects. Worked closely with designers and PMs, delivering tested and maintainable solutions using Umbraco CMS.
+
+Numiko, Leeds
+Senior Front-End Developer
+Jan 2022 – May 2022
+Delivered accessible, maintainable CMS sites using Drupal, Vue.js, Twig, and SCSS. Helped align front-end practices across the team by documenting methodologies and introducing consistency in coding standards, with a strong focus on modular design and reusability.
+
+Boiler Guide, Leicester
+Senior Front-End Developer
+Oct 2021 – Dec 2021
+Jumped into a short-term role and quickly upgraded a legacy codebase in PHP and JS. Delivered proof-of-concept prototypes to validate new ideas, enabling faster product iteration and reducing development risk.
+
+Arm, Glasgow
+Software Engineer
+Jul 2017 – Oct 2021
+Part of a team building a large-scale IoT platform. Used Vue.js and TypeScript within Docker environments to deliver front-end features with high performance and stability. Focused on front-end quality, maintainability, and reducing tech debt over time.
+
+Kura, Glasgow
+Front-End Developer
+2016 – Jul 2017
+Designed and built a custom installable web app for a new call center operating under strict security audits, which required compatibility with Internet Explorer 10. To work around browser limitations, created a lightweight Windows .msi installer that launched a headless Chrome instance, wrapping the app as a desktop-like experience.
+
+The app collected structured answers from call assistants, helping analysts identify the main reasons behind customer calls. Originally a side project, the tool saved the company over £25K annually by enabling smarter customer support strategies. Hosted internally, the app allowed instant updates — from modifying question sets to updating themes. A custom-built SQL dashboard let analysts filter, chart, and export data to Excel independently. Seasonal themes (e.g., Halloween, Christmas) were also added to reduce visual fatigue for daily users.
+
+Caliber, Edinburgh
+Front-End Developer
+Jun 2015 – Dec 2015
+Developed commercial features using JQuery, PHP, and SCSS. Partnered with designers to rapidly prototype and refine web interfaces across multiple client campaigns.
+
+Education
+The Open University
+Aug 2024 – Present
+
+BSc Computer Science (In Progress)
+
+The Open University
+Apr 2004 – Sep 2009
+
+Application Development & Management
+
+Web Applications: Design, Development & Management
+
+Client-Side & Server-Side Application Development
