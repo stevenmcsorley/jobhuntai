@@ -12,7 +12,7 @@ let browser;
 async function getBrowser() {
   if (browser) return browser;
   browser = await puppeteer.launch({
-    executablePath: '/usr/local/bin/chromium',
+    executablePath: '/usr/bin/google-chrome-stable',
     headless: true,
     args: [
       '--no-sandbox',

@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer-core');
+const { getBrowserLaunchOptions } = require('../utils/browserConfig');
 
 class CWJobsAdapter {
   constructor(config) {
@@ -7,18 +8,10 @@ class CWJobsAdapter {
   }
 
   async init() {
-    this.browser = await puppeteer.launch({
-      executablePath: '/usr/local/bin/chromium',
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process',
-        '--no-zygote'
-      ]
-    });
+    const launchOptions = getBrowserLaunchOptions(true);
+    // Add HTTP2 fix
+    launchOptions.args.push('--disable-http2');
+    this.browser = await puppeteer.launch(launchOptions);
   }
 
   async fetchJobs() {

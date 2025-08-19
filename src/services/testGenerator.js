@@ -1,8 +1,10 @@
 const Groq = require('groq-sdk');
 const behavioralTestGenerator = require('./behavioralTestGenerator');
+const { validateQuestionParams, validateAIResponse, ValidationError } = require('../utils/validation');
+const { retryWithBackoff, groqCircuitBreaker, performanceMonitor, GroqError } = require('../utils/errorHandler');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_MODEL = 'llama3-70b-8192';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
 if (!GROQ_API_KEY) {
   throw new Error('Missing GROQ_API_KEY in your .env');
@@ -34,6 +36,9 @@ const promptMatrix = {
 };
 
 async function generateTestQuestions(topic, difficulty, type = 'short_answer', count = 5) {
+  // Validate input parameters
+  validateQuestionParams(topic, difficulty, type, count);
+
   if (type.startsWith('behavioral_')) {
     console.log(`🤖 Generating ${count} behavioral questions...`);
     const questions = Array.from({ length: count }, behavioralTestGenerator.generateBehavioralQuestion);
@@ -41,35 +46,65 @@ async function generateTestQuestions(topic, difficulty, type = 'short_answer', c
     return questions;
   }
 
+  const timer = performanceMonitor.startTimer('generateTestQuestions');
   console.log(`🤖 Generating ${count} test questions for: ${topic} (${difficulty})`);
+  
   try {
     const promptTemplate = promptMatrix[type];
     if (!promptTemplate) {
-      throw new Error(`Invalid test type: ${type}`);
+      throw new ValidationError(`Invalid test type: ${type}`, 'type');
     }
 
     const prompt = promptTemplate.replace('{topic}', topic).replace('{difficulty}', difficulty);
-
     const questions = [];
+    
     for (let i = 0; i < count; i++) {
-      const chat = await groq.chat.completions.create({
-        model: GROQ_MODEL,
-        messages: [
-          { role: 'system', content: prompt },
-          { role: 'user', content: 'Please generate one question.' }
-        ],
-        response_format: { type: 'json_object' }
+      const questionData = await groqCircuitBreaker.execute(async () => {
+        return await retryWithBackoff(async () => {
+          const chat = await groq.chat.completions.create({
+            model: GROQ_MODEL,
+            messages: [
+              { role: 'system', content: prompt },
+              { role: 'user', content: 'Please generate one question.' }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.7,
+            max_tokens: 1000
+          });
+          
+          const content = chat.choices[0]?.message?.content;
+          if (!content) {
+            throw new GroqError('Empty response from AI service');
+          }
+          
+          const parsed = JSON.parse(content);
+          
+          // Validate AI response based on test type
+          const expectedFields = type === 'multiple_choice' 
+            ? ['question', 'options', 'answer']
+            : ['question', 'answer'];
+          validateAIResponse(parsed, expectedFields);
+          
+          return parsed;
+        });
       });
-      const questionData = JSON.parse(chat.choices[0].message.content || '{}');
+      
       questions.push(questionData);
     }
     
-    console.log(`✅ ${questions.length} questions generated.`);
+    const duration = timer.end();
+    console.log(`✅ ${questions.length} questions generated in ${duration}ms`);
     return questions;
 
   } catch (err) {
-    console.error(`❌ Groq error during question generation: ${err.message}`);
-    throw err;
+    timer.end();
+    console.error(`❌ Error during question generation: ${err.message}`);
+    
+    if (err instanceof ValidationError || err instanceof GroqError) {
+      throw err;
+    }
+    
+    throw new GroqError(`Failed to generate test questions: ${err.message}`, err);
   }
 }
 

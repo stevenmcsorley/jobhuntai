@@ -5,13 +5,13 @@ import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 const PreferencesPage = () => {
   const [preferences, setPreferences] = useState({
-    keywords: '',
-    location: '',
-    town: '',
+    keywords: 'Software Developer, Full Stack Developer, Frontend Developer',
+    location: 'London',
+    town: 'London',
     radius: '30',
-    salary: '',
-    stack_keywords: '',
-    market_fit_skills: '',
+    salary: '£60,000',
+    stack_keywords: 'javascript,typescript,react,node.js,python,html,css,git',
+    market_fit_skills: 'JavaScript,TypeScript,React,Node.js,Python,HTML,CSS,Git',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

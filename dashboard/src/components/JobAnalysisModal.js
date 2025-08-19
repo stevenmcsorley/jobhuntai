@@ -98,7 +98,17 @@ const JobAnalysisModal = ({ job, application, onClose, onJobUpdate, onApplicatio
   };
 
   // Derive all display data directly from props
-  const interviewPrep = job?.interview_prep ? (typeof job.interview_prep === 'string' ? JSON.parse(job.interview_prep) : job.interview_prep) : null;
+  const interviewPrep = job?.interview_prep ? (() => {
+    if (typeof job.interview_prep === 'string') {
+      try {
+        return JSON.parse(job.interview_prep);
+      } catch (error) {
+        console.error('Failed to parse interview_prep:', job.interview_prep, error);
+        return null;
+      }
+    }
+    return job.interview_prep;
+  })() : null;
   const coverLetter = job?.cover_letter || '';
   const companyInfo = job?.company_info || '';
   const matchResult = application;

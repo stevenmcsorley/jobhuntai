@@ -1,21 +1,13 @@
 const puppeteer = require('puppeteer-core');
+const { getBrowserLaunchOptions } = require('../utils/browserConfig');
 
 let browser;
 async function getBrowser() {
   if (browser) return browser;
-  browser = await puppeteer.launch({
-    executablePath: '/usr/local/bin/chromium',
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--single-process',
-      '--no-zygote',
-      '--disable-http2'
-    ]
-  });
+  const launchOptions = getBrowserLaunchOptions(true);
+  // Add HTTP2 fix
+  launchOptions.args.push('--disable-http2');
+  browser = await puppeteer.launch(launchOptions);
   return browser;
 }
 

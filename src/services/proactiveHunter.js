@@ -25,9 +25,9 @@ async function runProactiveHunt() {
     console.log(`🔍 Hunting for "${preferences.keywords}" in "${preferences.location}"...`);
 
     // 2. Dynamically construct URLs
-    const keywords = encodeURIComponent(preferences.keywords.replace(/,/g, ' ').replace(/\s+/g, ' ').trim());
-    const location = encodeURIComponent(preferences.location.toLowerCase().trim());
-    const town = encodeURIComponent(preferences.town.toLowerCase().trim());
+    const keywords = encodeURIComponent((preferences.keywords || '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim());
+    const location = encodeURIComponent((preferences.location || '').toLowerCase().trim());
+    const town = encodeURIComponent((preferences.town || preferences.location || '').toLowerCase().trim());
     const radius = preferences.radius || '30'; // Default to 30 if not set
 
     // Refined URLs for each job board

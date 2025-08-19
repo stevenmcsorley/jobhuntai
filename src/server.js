@@ -16,6 +16,7 @@ const coverLetterGenerator = require('./services/coverLetterGenerator');
 const companyInfoGenerator = require('./services/companyInfoGenerator');
 const testGenerator = require('./services/testGenerator');
 const guidanceGenerator = require('./services/guidanceGenerator');
+const { asyncHandler, errorHandler } = require('./utils/errorHandler');
 const cvTailor = require('./services/cvTailor');
 const skillExtractor = require('./services/skillExtractor');
 const fs = require('fs').promises;
@@ -1069,79 +1070,127 @@ app.delete('/api/tests/sessions/:id', async (req, res) => {
 
 // -- Guidance Hub Endpoints --
 
-// GET /api/guidance/summary - Get a summary of weakest topics
-app.get('/api/guidance/summary', async (req, res) => {
-    try {
-        const summary = await knex('test_sessions')
-            .select('skill')
-            .avg('score as average_score')
-            .groupBy('skill')
-            .orderBy('average_score', 'asc');
-        res.json(summary);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch guidance summary.', details: err.message });
+// GET /api/guidance/summary - Get enhanced summary with progress trends
+app.get('/api/guidance/summary', asyncHandler(async (req, res) => {
+    const summary = await knex('test_sessions')
+        .select('skill')
+        .avg('score as average_score')
+        .count('* as session_count')
+        .max('completed_at as last_attempt')
+        .groupBy('skill')
+        .orderBy('average_score', 'asc');
+
+    // Add progress trends for each skill
+    const enhancedSummary = await Promise.all(summary.map(async (item) => {
+        const progressTrends = await guidanceGenerator.analyzeProgressTrends(item.skill, knex);
+        return {
+            ...item,
+            average_score: Math.round(item.average_score),
+            session_count: parseInt(item.session_count),
+            last_attempt: item.last_attempt,
+            progress: progressTrends,
+            category: guidanceGenerator.detectSkillCategory(item.skill)
+        };
+    }));
+
+    res.json(enhancedSummary);
+}));
+
+// GET /api/guidance/:topic - Get enhanced learning plan with analytics
+app.get('/api/guidance/:topic', asyncHandler(async (req, res) => {
+    const { topic } = req.params;
+    
+    const incorrectResults = await knex('test_sessions')
+        .join('test_results', 'test_sessions.id', '=', 'test_results.session_id')
+        .where('test_sessions.skill', topic)
+        .andWhereNot('test_results.is_correct', true)
+        .select('test_results.*', 'test_sessions.completed_at');
+
+    if (incorrectResults.length === 0) {
+        const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+        return res.json({
+            guidance: {
+                summary_of_weaknesses: "No weaknesses found for this topic!",
+                learning_plan: [{
+                    step: "You haven't answered any questions on this topic incorrectly. Keep up the great work!",
+                    timeEstimate: "Continue practicing",
+                    priority: "low",
+                    resources: ["Keep taking tests to maintain proficiency"]
+                }],
+                knowledge_gaps: [],
+                practice_projects: [],
+                assessment_criteria: ["Maintain consistent high scores"],
+                estimated_mastery_time: "Already proficient",
+                metadata: {
+                    generatedAt: new Date().toISOString(),
+                    mistakeCount: 0,
+                    category: guidanceGenerator.detectSkillCategory(topic)
+                }
+            },
+            incorrectResults: [],
+            analytics: {
+                progressTrends,
+                studySchedule: []
+            }
+        });
     }
-});
 
-// GET /api/guidance/:topic - Get a detailed learning plan for a topic
-app.get('/api/guidance/:topic', async (req, res) => {
-    try {
-        const { topic } = req.params;
-        
-        const incorrectResults = await knex('test_sessions')
-            .join('test_results', 'test_sessions.id', '=', 'test_results.session_id')
-            .where('test_sessions.skill', topic)
-            .andWhereNot('test_results.is_correct', true)
-            .select('test_results.*');
+    const incorrectResultIds = incorrectResults.map(r => r.id).sort();
 
-        if (incorrectResults.length === 0) {
+    // Check for existing, valid guidance
+    const savedGuidance = await knex('guidance').where({ skill: topic }).first();
+    if (savedGuidance) {
+        const savedResultIds = JSON.parse(savedGuidance.source_result_ids).sort();
+        if (JSON.stringify(incorrectResultIds) === JSON.stringify(savedResultIds)) {
+            console.log(`🧠 Found valid saved guidance for "${topic}". Serving from cache.`);
+            
+            const guidance = JSON.parse(savedGuidance.guidance_text);
+            const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+            const studySchedule = guidanceGenerator.generateStudySchedule(guidance.learning_plan || []);
+            
             return res.json({
-                guidance: {
-                    summary_of_weaknesses: "No weaknesses found for this topic!",
-                    learning_plan: ["You haven't answered any questions on this topic incorrectly. Keep up the great work!"]
-                },
-                incorrectResults
+                guidance,
+                incorrectResults,
+                analytics: {
+                    progressTrends,
+                    studySchedule,
+                    cacheHit: true,
+                    lastGenerated: savedGuidance.created_at
+                }
             });
         }
-
-        const incorrectResultIds = incorrectResults.map(r => r.id).sort();
-
-        // Check for existing, valid guidance
-        const savedGuidance = await knex('guidance').where({ skill: topic }).first();
-        if (savedGuidance) {
-            const savedResultIds = JSON.parse(savedGuidance.source_result_ids).sort();
-            // If the incorrect answers are the same as last time, return the saved guidance
-            if (JSON.stringify(incorrectResultIds) === JSON.stringify(savedResultIds)) {
-                console.log(`🧠 Found valid saved guidance for "${topic}". Serving from cache.`);
-                return res.json({
-                    guidance: JSON.parse(savedGuidance.guidance_text),
-                    incorrectResults
-                });
-            }
-        }
-
-        // If no valid guidance exists, generate it
-        console.log(`✨ Generating new guidance for "${topic}"...`);
-        const guidance = await guidanceGenerator.generateGuidance(topic, incorrectResults);
-
-        // Save the new guidance to the database
-        await knex('guidance')
-            .insert({
-                skill: topic,
-                guidance_text: JSON.stringify(guidance),
-                source_result_ids: JSON.stringify(incorrectResultIds)
-            })
-            .onConflict('skill')
-            .merge();
-        
-        console.log(`💾 Saved new guidance for "${topic}" to the database.`);
-
-        res.json({ guidance, incorrectResults });
-
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to generate guidance.', details: err.message });
     }
-});
+
+    // Generate new enhanced guidance
+    console.log(`✨ Generating enhanced guidance for "${topic}"...`);
+    const guidance = await guidanceGenerator.generateGuidance(topic, incorrectResults);
+    
+    // Generate analytics
+    const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+    const studySchedule = guidanceGenerator.generateStudySchedule(guidance.learning_plan || []);
+
+    // Save the new guidance to the database
+    await knex('guidance')
+        .insert({
+            skill: topic,
+            guidance_text: JSON.stringify(guidance),
+            source_result_ids: JSON.stringify(incorrectResultIds)
+        })
+        .onConflict('skill')
+        .merge();
+    
+    console.log(`💾 Saved enhanced guidance for "${topic}" to the database.`);
+
+    res.json({ 
+        guidance, 
+        incorrectResults,
+        analytics: {
+            progressTrends,
+            studySchedule,
+            cacheHit: false
+        }
+    });
+}));
 
 
 // -- Orchestration Endpoint --
