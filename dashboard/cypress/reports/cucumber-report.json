@@ -1,327 +1,95 @@
 [
   {
-    "description": "  As a job seeker\n  I want to manage my master profile information\n  So that I can maintain accurate professional data for AI analysis",
+    "description": "",
     "elements": [
       {
         "description": "",
-        "id": "master-profile-basic-functionality;master-profile-page-loads-and-displays-correctly",
+        "id": "market-fit-page-basic-functionality;market-fit-page-loads-correctly",
+        "keyword": "Scenario",
+        "line": 6,
+        "name": "Market-Fit page loads correctly",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "I visit the market-fit page",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 3474000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 7,
+            "name": "I should see the market fit page title",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 527000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 8,
+            "name": "the page should be properly structured",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 87000000
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "market-fit-page-basic-functionality;empty-state-displays-correctly",
         "keyword": "Scenario",
         "line": 10,
-        "name": "Master Profile page loads and displays correctly",
+        "name": "Empty state displays correctly",
         "steps": [
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
+            "line": 4,
+            "name": "I visit the market-fit page",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 3428000000
+              "duration": 945000000
             }
           },
           {
             "arguments": [],
-            "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 202000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Given ",
+            "keyword": "Then ",
             "line": 11,
-            "name": "I am on the \"master-profile\" page",
+            "name": "I should see the empty state when no data is available",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 914000000
+              "duration": 463000000
             }
           },
           {
             "arguments": [],
-            "keyword": "When ",
+            "keyword": "And ",
             "line": 12,
-            "name": "the page loads completely",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 578000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 13,
-            "name": "I should see the master profile title",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 109000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 14,
-            "name": "I should see the profile management interface",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 65000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 15,
-            "name": "I should see the download profile button",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 90000000
-            }
-          }
-        ],
-        "tags": [],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "master-profile-basic-functionality;profile-sections-are-present-and-accessible",
-        "keyword": "Scenario",
-        "line": 17,
-        "name": "Profile sections are present and accessible",
-        "steps": [
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 528000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 204000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 18,
-            "name": "I am on the \"master-profile\" page",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 624000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 19,
-            "name": "I examine the profile sections",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 492000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 20,
-            "name": "I should see the personal profile section",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 123000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 21,
-            "name": "I should see the skills section",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 90000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 22,
-            "name": "I should see the work experience section",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 91000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 23,
-            "name": "I should see the projects section",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 75000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 24,
-            "name": "I should see the education section",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 73000000
-            }
-          }
-        ],
-        "tags": [],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "master-profile-basic-functionality;profile-action-buttons-work-appropriately",
-        "keyword": "Scenario",
-        "line": 26,
-        "name": "Profile action buttons work appropriately",
-        "steps": [
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 589000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 320000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 27,
-            "name": "I am on the \"master-profile\" page",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 544000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 28,
-            "name": "I check the profile action buttons",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 126000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 29,
-            "name": "I should see the download profile button",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 50000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 30,
-            "name": "the download button should be properly configured",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 24000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 31,
-            "name": "the buttons should respond to interactions",
+            "name": "I should see the empty state icon",
             "match": {
               "location": "not available:0"
             },
@@ -329,107 +97,18 @@
               "status": "passed",
               "duration": 39000000
             }
-          }
-        ],
-        "tags": [],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "master-profile-basic-functionality;profile-page-layout-is-well-organized",
-        "keyword": "Scenario",
-        "line": 33,
-        "name": "Profile page layout is well-organized",
-        "steps": [
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 864000000
-            }
           },
           {
             "arguments": [],
             "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
+            "line": 13,
+            "name": "I should see helpful guidance message",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 175000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 34,
-            "name": "I am on the \"master-profile\" page",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 865000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 35,
-            "name": "I examine the profile page layout",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 326000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 36,
-            "name": "the header section should be clearly visible",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 58000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 37,
-            "name": "the profile content should be organized in logical sections",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 69000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 38,
-            "name": "the page should be responsive and accessible",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 143000000
+              "duration": 41000000
             }
           }
         ],
@@ -438,81 +117,55 @@
       },
       {
         "description": "",
-        "id": "master-profile-basic-functionality;profile-data-loading-states-are-handled",
+        "id": "market-fit-page-basic-functionality;loaded-state-displays-market-analysis",
         "keyword": "Scenario",
-        "line": 40,
-        "name": "Profile data loading states are handled",
+        "line": 15,
+        "name": "Loaded state displays market analysis",
         "steps": [
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
+            "line": 4,
+            "name": "I visit the market-fit page",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 857000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 228000000
+              "duration": 645000000
             }
           },
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 41,
-            "name": "I am on the \"master-profile\" page",
+            "line": 16,
+            "name": "market data is available",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 584000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 42,
-            "name": "the profile data loads",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 1193000000
+              "duration": 195000000
             }
           },
           {
             "arguments": [],
             "keyword": "Then ",
-            "line": 43,
-            "name": "the loading state should be handled gracefully",
+            "line": 17,
+            "name": "I should see the loaded market fit title",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 43000000
+              "duration": 71000000
             }
           },
           {
             "arguments": [],
             "keyword": "And ",
-            "line": 44,
-            "name": "the content should display properly once loaded",
+            "line": 18,
+            "name": "I should see the analysis subtitle",
             "match": {
               "location": "not available:0"
             },
@@ -520,6 +173,19 @@
               "status": "passed",
               "duration": 88000000
             }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 19,
+            "name": "I should see the analysis card",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 92000000
+            }
           }
         ],
         "tags": [],
@@ -527,100 +193,213 @@
       },
       {
         "description": "",
-        "id": "master-profile-basic-functionality;profile-sections-support-data-management",
+        "id": "market-fit-page-basic-functionality;skills-analysis-section-is-functional",
         "keyword": "Scenario",
-        "line": 46,
-        "name": "Profile sections support data management",
+        "line": 21,
+        "name": "Skills analysis section is functional",
         "steps": [
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 7,
-            "name": "I visit the application",
+            "line": 4,
+            "name": "I visit the market-fit page",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 767000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "And ",
-            "line": 8,
-            "name": "I wait for the page to load",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 155000000
+              "duration": 736000000
             }
           },
           {
             "arguments": [],
             "keyword": "Given ",
-            "line": 47,
-            "name": "I am on the \"master-profile\" page",
+            "line": 22,
+            "name": "market data is available",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 564000000
-            }
-          },
-          {
-            "arguments": [],
-            "keyword": "When ",
-            "line": 48,
-            "name": "I examine individual profile sections",
-            "match": {
-              "location": "not available:0"
-            },
-            "result": {
-              "status": "passed",
-              "duration": 170000000
+              "duration": 208000000
             }
           },
           {
             "arguments": [],
             "keyword": "Then ",
-            "line": 49,
-            "name": "each section should be clearly labeled",
+            "line": 23,
+            "name": "I should see the skills analysis title",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 29000000
+              "duration": 60000000
             }
           },
           {
             "arguments": [],
             "keyword": "And ",
-            "line": 50,
-            "name": "each section should support data entry or display",
+            "line": 24,
+            "name": "I should see the skills chart container",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 23000000
+              "duration": 45000000
             }
           },
           {
             "arguments": [],
             "keyword": "And ",
-            "line": 51,
-            "name": "the sections should be visually organized",
+            "line": 25,
+            "name": "chart should display skill data",
             "match": {
               "location": "not available:0"
             },
             "result": {
               "status": "passed",
-              "duration": 24000000
+              "duration": 63000000
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "market-fit-page-basic-functionality;page-layout-adapts-to-different-data-states",
+        "keyword": "Scenario",
+        "line": 27,
+        "name": "Page layout adapts to different data states",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "I visit the market-fit page",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 668000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 28,
+            "name": "the page should handle loading states gracefully",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 240000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 29,
+            "name": "content should be properly organized",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 90000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 30,
+            "name": "responsive design should work correctly",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 129000000
+            }
+          }
+        ],
+        "tags": [],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "market-fit-page-basic-functionality;market-analysis-provides-meaningful-insights",
+        "keyword": "Scenario",
+        "line": 32,
+        "name": "Market analysis provides meaningful insights",
+        "steps": [
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 4,
+            "name": "I visit the market-fit page",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 732000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 33,
+            "name": "market data is available",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 183000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 34,
+            "name": "skills data should be clearly presented",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 166000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 35,
+            "name": "percentage information should be visible",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 66000000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 36,
+            "name": "analysis should be informative",
+            "match": {
+              "location": "not available:0"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 63000000
             }
           }
         ],
@@ -628,11 +407,11 @@
         "type": "scenario"
       }
     ],
-    "id": "master-profile-basic-functionality",
+    "id": "market-fit-page-basic-functionality",
     "line": 1,
     "keyword": "Feature",
-    "name": "Master Profile Basic Functionality",
+    "name": "Market-Fit page basic functionality",
     "tags": [],
-    "uri": "cypress/e2e/master-profile-basic.feature"
+    "uri": "cypress/e2e/market-fit-basic.feature"
   }
 ]

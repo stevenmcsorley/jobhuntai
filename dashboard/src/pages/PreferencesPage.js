@@ -74,13 +74,14 @@ const PreferencesPage = () => {
             <div className="flex items-center space-x-3">
               <Cog6ToothIcon className="h-8 w-8" />
               <div>
-                <h1 className="text-2xl font-bold">Search Preferences</h1>
+                <h1 className="text-2xl font-bold" data-testid="preferences-page-title">Search Preferences</h1>
                 <p className="text-indigo-100">Configure your job search criteria</p>
               </div>
             </div>
             <button
               onClick={handleSave}
               disabled={isSaving}
+              data-testid="save-preferences-button"
               className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-colors ${
                 isSaving
                   ? 'bg-white/20 cursor-not-allowed text-white/60'
@@ -100,7 +101,7 @@ const PreferencesPage = () => {
         </div>
 
         {/* Preferences Form */}
-        <div className="glass-card p-6">
+        <div className="glass-card p-6" data-testid="preferences-form">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Job Search Criteria</h2>
             <p className="text-gray-600 dark:text-gray-400">
@@ -120,6 +121,7 @@ const PreferencesPage = () => {
                 value={preferences.keywords}
                 onChange={handleChange}
                 placeholder="e.g., Senior Python Developer, React, DevOps"
+                data-testid="keywords-input"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -138,6 +140,7 @@ const PreferencesPage = () => {
                 value={preferences.stack_keywords}
                 onChange={handleChange}
                 placeholder="e.g., react,typescript,node,python"
+                data-testid="stack-keywords-textarea"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -156,6 +159,7 @@ const PreferencesPage = () => {
                 value={preferences.market_fit_skills}
                 onChange={handleChange}
                 placeholder="e.g., React,Node.js,Python,AWS"
+                data-testid="market-fit-skills-textarea"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -175,6 +179,7 @@ const PreferencesPage = () => {
                   value={preferences.town}
                   onChange={handleChange}
                   placeholder="e.g., Glasgow, Manchester"
+                  data-testid="town-input"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -188,6 +193,7 @@ const PreferencesPage = () => {
                   name="radius"
                   value={preferences.radius}
                   onChange={handleChange}
+                  data-testid="radius-select"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="0">0</option>
@@ -210,6 +216,7 @@ const PreferencesPage = () => {
                 value={preferences.location}
                 onChange={handleChange}
                 placeholder="e.g., London, Remote, United Kingdom"
+                data-testid="location-input"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -225,6 +232,7 @@ const PreferencesPage = () => {
                 value={preferences.salary}
                 onChange={handleChange}
                 placeholder="e.g., £80,000, >100k"
+                data-testid="salary-input"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">

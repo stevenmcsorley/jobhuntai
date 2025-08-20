@@ -31,6 +31,12 @@ Cypress.Commands.add('navigateToPage', (pageName) => {
   cy.visit(pageRoutes[pageName] || '/');
 });
 
+// Page visit command with app readiness check
+Cypress.Commands.add('visitPage', (pageName) => {
+  cy.navigateToPage(pageName);
+  cy.waitForApp();
+});
+
 // Wait for application to be ready
 Cypress.Commands.add('waitForApp', () => {
   // Wait for any of these indicators that the app has loaded

@@ -58,7 +58,7 @@ const CVEditorPage = () => {
           <div className="flex items-center space-x-3">
             <DocumentTextIcon className="h-8 w-8" />
             <div>
-              <h1 className="text-2xl font-bold">CV Editor</h1>
+              <h1 className="text-2xl font-bold" data-testid="cv-editor-title">CV Editor</h1>
               <p className="text-blue-100">Edit and manage your CV content</p>
             </div>
           </div>
@@ -81,6 +81,7 @@ const CVEditorPage = () => {
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               }`}
+              data-testid="save-cv-button"
             >
               {isSaving ? (
                 <>
@@ -98,6 +99,7 @@ const CVEditorPage = () => {
             value={cvContent}
             onChange={(e) => setCvContent(e.target.value)}
             placeholder="Paste your CV content here..."
+            data-testid="cv-content-textarea"
           />
         </div>
       </div>
