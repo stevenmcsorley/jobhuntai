@@ -9,6 +9,7 @@ const ThemeToggler = () => {
     <div className="flex items-center space-x-3">
       <button
         onClick={toggleTheme}
+        data-cy="theme-toggle"
         className={`group relative flex items-center justify-center w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
           theme === 'dark' 
             ? 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-violet-500/25' 

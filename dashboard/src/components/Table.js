@@ -243,7 +243,7 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
                   .map((page, index, array) => (
                     <React.Fragment key={page}>
                       {index > 0 && array[index - 1] !== page - 1 && (
-                        <span className="px-2 text-gray-400">...</span>
+                        <span className="px-2 text-gray-400 dark:text-gray-500">...</span>
                       )}
                       <button
                         onClick={() => setCurrentPage(page)}

@@ -60,7 +60,7 @@ const NotesTab = ({ application }) => {
       <div className="space-y-4">
         {notes.map(note => (
           <div key={note.id} className="p-4 bg-gray-100 rounded dark:bg-gray-800">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 dark:text-gray-300">
               {new Date(note.created_at).toLocaleString()}
             </p>
             <p>{note.note}</p>

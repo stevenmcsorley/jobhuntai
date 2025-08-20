@@ -1,0 +1,29 @@
+[
+  {
+    "title": "Senior React Developer",
+    "company": "TechCorp Inc",
+    "url": "https://example.com/job/react-dev",
+    "location": "San Francisco, CA",
+    "description": "We are looking for a senior React developer with 5+ years of experience...",
+    "salary": "$120,000 - $150,000",
+    "posted": "2 days ago"
+  },
+  {
+    "title": "Full Stack Engineer",
+    "company": "Startup XYZ",
+    "url": "https://example.com/job/fullstack",
+    "location": "Remote",
+    "description": "Join our growing team as a full stack engineer working with React and Node.js...",
+    "salary": "$100,000 - $130,000",
+    "posted": "1 week ago"
+  },
+  {
+    "title": "Frontend Developer",
+    "company": "Design Agency",
+    "url": "https://example.com/job/frontend",
+    "location": "New York, NY",
+    "description": "We need a frontend developer skilled in modern JavaScript frameworks...",
+    "salary": "$80,000 - $100,000",
+    "posted": "3 days ago"
+  }
+]

@@ -13,7 +13,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.10.0",
+    "axios": "^0.27.2",
     "bootstrap": "^5.3.7",
     "chart.js": "^4.5.0",
     "react": "^19.1.0",
@@ -31,7 +31,18 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:chrome": "cypress run --browser chrome",
+    "cy:run:headed": "cypress run --headed",
+    "test:e2e": "start-server-and-test start http://localhost:3000 cy:run",
+    "test:e2e:open": "start-server-and-test start http://localhost:3000 cy:open",
+    "test:dark-mode": "cypress run --spec 'cypress/e2e/dark-mode-ux.feature'",
+    "test:dashboard": "cypress run --spec 'cypress/e2e/dashboard.feature'",
+    "test:test-hub": "cypress run --spec 'cypress/e2e/test-hub.feature'",
+    "capture:screenshots": "cypress run --config video=false --reporter spec",
+    "analyze:ux": "cypress run --config video=false screenshotOnRunFailure=true --spec 'cypress/e2e/dark-mode-ux.feature,cypress/e2e/dashboard.feature'"
   },
   "eslintConfig": {
     "extends": [
@@ -52,9 +63,14 @@
     ]
   },
   "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^22.2.0",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.5",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "^10.4.21",
+    "cypress": "^14.5.4",
+    "cypress-real-events": "^1.14.0",
     "postcss": "^8.5.6",
+    "start-server-and-test": "^2.0.13",
     "tailwindcss": "^3.4.17"
   }
 }

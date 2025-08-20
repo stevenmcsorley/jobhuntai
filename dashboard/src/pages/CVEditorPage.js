@@ -43,7 +43,7 @@ const CVEditorPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center min-h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading CV...</span>
+            <span className="ml-3 text-gray-600 dark:text-gray-300">Loading CV...</span>
           </div>
         </div>
       </div>
@@ -68,8 +68,8 @@ const CVEditorPage = () => {
         <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">CV Content</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">CV Content</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Your CV is used by the AI to generate cover letters and match you to jobs.
               </p>
             </div>
@@ -94,7 +94,7 @@ const CVEditorPage = () => {
           </div>
 
           <textarea
-            className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={cvContent}
             onChange={(e) => setCvContent(e.target.value)}
             placeholder="Paste your CV content here..."

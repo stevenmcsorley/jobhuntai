@@ -383,11 +383,11 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
               onClick={() => navigate(-1)} 
               className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
             >
-              <ArrowLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <ArrowLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
             <div>
               <h1 className="text-3xl font-bold text-gradient">{job.title}</h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-600 dark:text-gray-400 mt-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-600 dark:text-gray-300 mt-2">
                 <div className="flex items-center space-x-1">
                   <BuildingOfficeIcon className="w-4 h-4" />
                   <span>{job.company}</span>
@@ -422,7 +422,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                   className={`whitespace-nowrap flex items-center py-3 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
                     activeTab === tab.id 
                       ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400' 
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-500'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:border-gray-400'
                   }`}
                 >
                   <tab.icon className="w-5 h-5 mr-2" />
@@ -444,7 +444,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
           {activeTab === 'description' && (
             <div>
               <textarea
-                className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none font-mono text-sm"
+                className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none font-mono text-sm"
                 value={editableDescription}
                 onChange={(e) => setEditableDescription(e.target.value)}
                 placeholder="Job description will appear here..."
@@ -468,7 +468,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
               </div>
               {skills.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Extracted Skills</h4>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Extracted Skills</h4>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
                       <div key={index} className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 transition-all duration-200 hover:shadow-sm">
@@ -493,7 +493,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                           e.target.value = '';
                         }
                       }}
-                      className="w-full md:w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      className="w-full md:w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     />
                   </div>
                 </div>
@@ -511,7 +511,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 {isGeneratingCompanyInfo ? 'Generating...' : 'Generate Company Info'}
               </button>
               <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                <pre className="whitespace-pre-wrap text-sm text-gray-900 dark:text-white">
+                <pre className="whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100">
                   {companyInfo || 'No company information available. Click the button to generate it.'}
                 </pre>
               </div>
@@ -559,7 +559,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                   <div className={`glass-card p-4 border-l-4 ${
                     matchResult.score > 0.5 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20'
                   }`}>
-                    <h6 className="font-semibold text-gray-900 dark:text-white mb-2">Match Result</h6>
+                    <h6 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Match Result</h6>
                     <p className="mb-3"><strong>Score:</strong> {(matchResult.score * 100).toFixed(0)}%</p>
                     <div>
                       <strong>Key Reasons:</strong>
@@ -634,7 +634,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
               </button>
               {coverLetter && (
                 <textarea
-                  className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none font-mono text-sm"
+                  className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none font-mono text-sm"
                   value={coverLetter}
                   readOnly
                 />

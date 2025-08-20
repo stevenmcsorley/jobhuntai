@@ -76,8 +76,8 @@ const BulkAddPage = ({ fetchData }) => {
           <div className="flex items-start space-x-3">
             <DocumentTextIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0" />
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">How it works</h2>
-              <p className="text-gray-600 dark:text-gray-400">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">How it works</h2>
+              <p className="text-gray-600 dark:text-gray-300">
                 Paste a JSON array of job objects into the text area below to add them to the database.
                 The <code className="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm">source</code> will be automatically set to "manual-bulk".
               </p>
@@ -90,8 +90,8 @@ const BulkAddPage = ({ fetchData }) => {
           {/* JSON Input */}
           <div className="glass-card p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">JSON Input</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">JSON Input</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Paste your job data in JSON format below
               </p>
             </div>
@@ -99,7 +99,7 @@ const BulkAddPage = ({ fetchData }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <textarea
-                  className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
                   placeholder="Paste your JSON here..."
@@ -134,56 +134,56 @@ const BulkAddPage = ({ fetchData }) => {
           {/* Format Guide */}
           <div className="glass-card p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Required JSON Format</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Required JSON Format</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 The input must be a valid JSON array with the following structure
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Required Keys:</h4>
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Required Keys:</h4>
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded text-sm">title</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded text-sm">company</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded text-sm">url</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string, must be unique)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string, must be unique)</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Optional Keys:</h4>
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Optional Keys:</h4>
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded text-sm">location</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded text-sm">description</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded text-sm">posted</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded text-sm">salary</code>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">(string)</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">(string)</span>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Example:</h4>
-                <pre className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-800 dark:text-gray-200 overflow-x-auto">
+                <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Example:</h4>
+                <pre className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-800 dark:text-gray-100 overflow-x-auto">
                   <code>{requiredFormat}</code>
                 </pre>
               </div>

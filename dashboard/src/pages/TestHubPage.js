@@ -30,13 +30,13 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
   return (
     <div className="surface-card p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">Start a New Test</h2>
-        <p className="text-neutral-600 dark:text-neutral-400">Select a topic, difficulty, and test type to begin.</p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-gray-100 mb-2">Start a New Test</h2>
+        <p className="text-neutral-600 dark:text-gray-300">Select a topic, difficulty, and test type to begin.</p>
       </div>
         
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Test Type</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Test Type</label>
             <select 
               className="input-modern" 
               value={type} 
@@ -61,7 +61,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
           {!isBehavioral && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Topic (Suggested from Market Fit)</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Topic (Suggested from Market Fit)</label>
                 <select 
                   className="input-modern" 
                   value={skill} 
@@ -73,7 +73,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Or Enter a Custom Topic</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Or Enter a Custom Topic</label>
                 <input 
                   type="text" 
                   className="input-modern" 
@@ -84,7 +84,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Difficulty</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Difficulty</label>
                 <select 
                   className="input-modern" 
                   value={difficulty} 
@@ -121,19 +121,19 @@ const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, 
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
           {session.difficulty !== 'N/A' && (
-            <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
+            <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
           )}
         </div>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
+        <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
       </div>
       
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Question:</h3>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-gray-100 mb-3">Question:</h3>
           <div className="surface-card-soft p-4">
-            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+            <p className="text-neutral-700 dark:text-gray-200 whitespace-pre-wrap">
               {question.question_text}
             </p>
           </div>
@@ -176,17 +176,17 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
-          <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
+          <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
         </div>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
+        <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
       </div>
       
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Question:</h3>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-gray-100 mb-3">Question:</h3>
           <div className="surface-card-soft p-4">
-            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+            <p className="text-neutral-700 dark:text-gray-200 whitespace-pre-wrap">
               {question.question_text}
             </p>
           </div>
@@ -210,7 +210,7 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
                 checked={selectedOption === option}
                 onChange={() => setSelectedOption(option)}
               />
-              <span className="ml-3 text-neutral-900 dark:text-white">{option}</span>
+              <span className="ml-3 text-neutral-900 dark:text-gray-100">{option}</span>
             </label>
           ))}
         </div>
@@ -259,24 +259,24 @@ const CodeChallengeTestSession = ({ session, question, onAnswerSubmit, questionN
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
-          <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
+          <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
         </div>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
+        <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
       </div>
       
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Challenge:</h3>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-gray-100 mb-3">Challenge:</h3>
           <div className="surface-card-soft p-4">
-            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+            <p className="text-neutral-700 dark:text-gray-200 whitespace-pre-wrap">
               {question.question_text}
             </p>
           </div>
         </div>
         
         <div className="flex items-center space-x-4 mb-4">
-          <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Language:</label>
+          <label className="text-sm font-medium text-neutral-700 dark:text-gray-200">Language:</label>
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value)}
@@ -377,13 +377,13 @@ const TestResults = ({ session, results, onRestart, onRetake }) => {
   return (
     <div className="glass-card p-6">
       <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Test Complete!</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Test Complete!</h2>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <span className="text-lg text-gray-700 dark:text-gray-300">Final Score:</span>
+            <span className="text-lg text-gray-700 dark:text-gray-200">Final Score:</span>
             <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{session.score}%</span>
           </div>
-          <div className="text-gray-600 dark:text-gray-400">
+          <div className="text-gray-600 dark:text-gray-300">
             Topic: {session.skill} ({session.difficulty})
           </div>
         </div>
@@ -392,12 +392,12 @@ const TestResults = ({ session, results, onRestart, onRetake }) => {
         {results.map(result => (
           <div key={result.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Question:</h3>
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{result.question_text}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Question:</h3>
+              <p className="text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{result.question_text}</p>
             </div>
             
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your Answer:</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Your Answer:</h3>
               <pre className={`p-4 rounded-lg text-sm overflow-x-auto ${
                 result.is_correct 
                   ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800' 
@@ -410,13 +410,13 @@ const TestResults = ({ session, results, onRestart, onRetake }) => {
             </div>
             
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Feedback:</h3>
-              <p className="text-gray-700 dark:text-gray-300">{result.feedback}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Feedback:</h3>
+              <p className="text-gray-700 dark:text-gray-200">{result.feedback}</p>
             </div>
             
             {!result.is_correct && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Correct Answer:</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Correct Answer:</h3>
                 <pre className="p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200 overflow-x-auto">
                   <code>{JSON.parse(result.correct_answer)}</code>
                 </pre>
@@ -448,25 +448,25 @@ const TestResults = ({ session, results, onRestart, onRetake }) => {
 
 const TestHistory = ({ history, onRetake, onContinue, onDelete }) => (
   <div className="glass-card p-6">
-    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Test History</h2>
+    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Test History</h2>
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Skill</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Difficulty</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Skill</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Difficulty</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Score</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
           {history.map(session => (
             <tr key={session.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{session.skill}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.type}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.difficulty}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{session.skill}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{session.type}</td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{session.difficulty}</td>
               <td className="px-6 py-4 whitespace-nowrap">
                 {session.score !== null ? (
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -483,7 +483,7 @@ const TestHistory = ({ history, onRetake, onContinue, onDelete }) => (
                   </span>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                 {new Date(session.completed_at).toLocaleDateString()}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
@@ -521,16 +521,16 @@ const TestHistory = ({ history, onRetake, onContinue, onDelete }) => (
 const PromptMatrix = ({ prompts }) => (
   <div className="glass-card p-6">
     <div className="mb-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">AI Prompt Matrix</h2>
-      <p className="text-gray-600 dark:text-gray-400">This is a read-only view of the prompts used to generate tests.</p>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">AI Prompt Matrix</h2>
+      <p className="text-gray-600 dark:text-gray-300">This is a read-only view of the prompts used to generate tests.</p>
     </div>
     <div className="space-y-6">
       {Object.entries(prompts).map(([type, prompt]) => (
         <div key={type}>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">
             {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
           </h3>
-          <pre className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-800 dark:text-gray-200 overflow-x-auto">
+          <pre className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-800 dark:text-gray-100 overflow-x-auto">
             <code>{prompt}</code>
           </pre>
         </div>
@@ -720,7 +720,7 @@ const TestHubPage = () => {
               <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Test Hub</h1>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                <p className="text-neutral-600 dark:text-gray-300 text-sm">
                   Practice and improve your technical skills with AI-generated questions
                 </p>
               </div>
@@ -751,7 +751,7 @@ const TestHubPage = () => {
         {isLoading ? (
           <div className="flex items-center justify-center min-h-64">
             <div className="spinner-modern w-8 h-8"></div>
-            <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading...</span>
+            <span className="ml-3 text-neutral-600 dark:text-gray-300">Loading...</span>
           </div>
         ) : (
           renderView()
