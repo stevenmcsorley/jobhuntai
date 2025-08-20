@@ -7,7 +7,7 @@ import {
   faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut
 } from '@fortawesome/free-solid-svg-icons';
 
-const Sidebar = () => {
+const Sidebar = ({ opportunitiesCount = 0 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -62,6 +62,7 @@ const Sidebar = () => {
             }
             title={isCollapsed ? item.label : ''}
             style={{ animationDelay: `${index * 50}ms` }}
+            data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
           >
             <div className="flex items-center space-x-4 relative z-10">
               <div className={`relative p-2 rounded-lg transition-all duration-300 group-hover:scale-110 ${
@@ -98,8 +99,11 @@ const Sidebar = () => {
             
             {/* Notification badges */}
             {item.label === 'Opportunities' && !isCollapsed && (
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                3
+              <div 
+                className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg"
+                data-testid="opportunities-badge"
+              >
+                {opportunitiesCount || 0}
               </div>
             )}
             

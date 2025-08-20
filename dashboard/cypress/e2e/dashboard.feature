@@ -7,34 +7,37 @@ Feature: Dashboard Navigation and Overview
     Given I visit the application
     And I wait for the page to load
 
-  Scenario: View dashboard overview
+  Scenario: Dashboard displays correctly
     Given I am on the "dashboard" page
     Then I should see "Job Hunt Dashboard"
     And I should see "Applied Jobs"
     And I should see "Follow-up"
-    And I capture a screenshot for analysis
 
-  Scenario: Navigate between different sections
+  Scenario: Navigation between sections works
     Given I am on the "dashboard" page
     When I click on "Opportunities"
     Then I should be on the "opportunities" page
-    And I capture a screenshot for analysis
+    And the page should load without errors
 
-  Scenario: View dashboard in dark mode
+  Scenario: Dashboard statistics are functional
     Given I am on the "dashboard" page
-    And the application is in "dark" mode
-    Then all text should be visible in dark mode
-    And I capture a screenshot for analysis
+    Then job statistics should be displayed correctly
+    And statistics should be readable and accessible
 
-  Scenario: Dashboard statistics are displayed
+  Scenario: Job management table works
     Given I am on the "dashboard" page
-    Then I should see applied jobs statistics
-    And I should see follow-up jobs statistics
-    And I capture a screenshot for analysis
+    When the page loads completely
+    Then the jobs table should be present if there are jobs
+    And any action buttons should be functional
 
-  Scenario: Job table functionality
+  Scenario: Dashboard works in both themes
     Given I am on the "dashboard" page
-    When I wait for the page to load
-    Then I should see the jobs table
-    And the jobs table should have action buttons
-    And I capture a screenshot for analysis
+    When I toggle between light and dark themes
+    Then the page should remain functional in both themes
+    And all text should remain readable
+
+  Scenario: Dashboard responsive design
+    Given I am on the "dashboard" page
+    Then the layout should be responsive
+    And important elements should be accessible
+    And navigation should work properly

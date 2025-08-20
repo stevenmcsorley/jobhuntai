@@ -117,10 +117,13 @@ function App() {
     return combined;
   });
 
+  // Calculate opportunities count for sidebar badge
+  const opportunitiesCount = applications.filter(app => app.status === 'opportunity').length;
+
   return (
     <Router>
       <div className="flex min-h-screen bg-neutral-50 dark:bg-slate-900 scrollbar-modern">
-        <Sidebar />
+        <Sidebar opportunitiesCount={opportunitiesCount} />
         <main className="flex-1 overflow-hidden bg-dot-pattern">
           <Routes>
             <Route path="/" element={<DashboardPage applications={combinedApps} allJobs={jobs} fetchData={fetchData} onJobUpdate={handleJobUpdate} onMatchComplete={handleMatchResult} />} />

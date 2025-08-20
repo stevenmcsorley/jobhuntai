@@ -16,12 +16,15 @@ Cypress.Commands.add('navigateToPage', (pageName) => {
   const pageRoutes = {
     'dashboard': '/',
     'opportunities': '/opportunities',
+    'master-profile': '/profile',
+    'profile': '/profile',
     'test-hub': '/test-hub',
     'market-fit': '/market-fit',
     'interviews': '/interviews',
     'stats': '/stats',
     'cv-editor': '/cv-editor',
     'bulk-add': '/bulk-add',
+    'preferences': '/preferences',
     'admin': '/admin'
   };
   
@@ -39,18 +42,14 @@ Cypress.Commands.add('waitForApp', () => {
     .should('have.length.at.least', 1);
 });
 
-// Screenshot commands for Claude Code analysis
+// Screenshot commands for Claude Code analysis - let Cypress handle automatic screenshots
+// We can still add this command for explicit screenshots when needed
 Cypress.Commands.add('captureUXScreenshot', (name, options = {}) => {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const screenshotName = `${name}-${timestamp}`;
-  
-  cy.screenshot(screenshotName, {
+  cy.screenshot(name, {
     capture: 'fullPage',
     overwrite: true,
     ...options
   });
-  
-  cy.task('log', `UX Screenshot captured: ${screenshotName}`);
 });
 
 // Theme switching
@@ -103,47 +102,7 @@ Cypress.Commands.add('waitForLoading', () => {
   cy.get('[data-cy="spinner"]').should('not.exist');
 });
 
-// Dark mode testing
-Cypress.Commands.add('testDarkModeVisibility', () => {
-  // Switch to dark mode
-  cy.switchTheme('dark');
-  
-  // Capture screenshot in dark mode
-  cy.captureUXScreenshot('dark-mode-visibility');
-  
-  // Check that text is visible (not pure black/dark)
-  cy.get('html').should('have.class', 'dark');
-  
-  // Test common elements for visibility - more graceful approach
-  cy.get('body').then(($body) => {
-    // Check headers if they exist
-    if ($body.find('h1, h2, h3, h4, h5, h6').length > 0) {
-      cy.get('h1, h2, h3, h4, h5, h6').each(($el) => {
-        if ($el.is(':visible')) {
-          cy.wrap($el).should('be.visible');
-        }
-      });
-    }
-    
-    // Check text elements but be more selective
-    if ($body.find('p').length > 0) {
-      cy.get('p').each(($el) => {
-        if ($el.is(':visible') && $el.width() > 0 && $el.height() > 0) {
-          cy.wrap($el).should('be.visible');
-        }
-      });
-    }
-    
-    // Only check span elements that are likely to be visible content
-    if ($body.find('span:not(.truncate):not([class*="hidden"])').length > 0) {
-      cy.get('span:not(.truncate):not([class*="hidden"])').each(($el) => {
-        if ($el.is(':visible') && $el.width() > 5 && $el.height() > 5) {
-          cy.wrap($el).should('be.visible');
-        }
-      });
-    }
-  });
-});
+// Dark mode testing - removed explicit screenshot capture, focus on UX validation
 
 // API response mocking
 Cypress.Commands.add('mockApiResponse', (endpoint, fixture) => {

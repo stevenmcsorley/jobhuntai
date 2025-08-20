@@ -278,7 +278,7 @@ const OpportunitiesPage = ({ applications, fetchData, onJobUpdate, onMatchComple
         <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
             <div className="space-y-3">
-              <h1 className="text-display-xl text-gradient-success font-bold tracking-tight">Opportunities</h1>
+              <h1 className="text-display-xl text-gradient-success font-bold tracking-tight" data-testid="opportunities-page-title">Opportunities</h1>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                 <p className="text-neutral-600 dark:text-neutral-400 text-sm">

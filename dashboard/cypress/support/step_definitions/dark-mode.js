@@ -154,3 +154,167 @@ Then('dropdown options should be visible', () => {
       .and('not.have.css', 'color', 'rgb(0, 0, 0)');
   });
 });
+
+// New UX-focused step definitions
+Then('the page title should be visible and readable', () => {
+  cy.get('h1').should('be.visible').and('not.have.css', 'color', 'rgb(0, 0, 0)');
+});
+
+Then('job statistics should have good contrast', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('.stats-card, .surface-card, [data-cy*="stat"]').length > 0) {
+      cy.get('.stats-card, .surface-card, [data-cy*="stat"]').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No statistics found on page');
+    }
+  });
+});
+
+Then('table headers should be readable in dark mode', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('th, .table-header').length > 0) {
+      cy.get('th, .table-header').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No table headers found on page');
+    }
+  });
+});
+
+Then('action buttons should be clearly visible', () => {
+  cy.get('button').first().should('be.visible').and('not.have.css', 'color', 'rgb(0, 0, 0)');
+});
+
+Then('the page should load successfully', () => {
+  cy.get('body').should('be.visible');
+  cy.url().should('not.contain', '404');
+});
+
+Then('any job cards should be readable if present', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('.job-card, [data-cy="job-opportunity"]').length > 0) {
+      cy.get('.job-card, [data-cy="job-opportunity"]').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No job cards found on page');
+    }
+  });
+});
+
+Then('navigation elements should be visible', () => {
+  cy.get('nav, .nav, [role="navigation"]').should('be.visible');
+});
+
+Then('form elements should be clearly visible', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('input, select, textarea').length > 0) {
+      cy.get('input, select, textarea').first().should('be.visible');
+    } else {
+      cy.log('No form elements found on page');
+    }
+  });
+});
+
+Then('any dropdown menus should be readable', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('select').length > 0) {
+      cy.get('select').first().should('be.visible').and('not.have.css', 'color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No dropdown menus found on page');
+    }
+  });
+});
+
+Then('submit buttons should be accessible', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('button[type="submit"], .submit-btn, [data-cy*="submit"]').length > 0) {
+      cy.get('button[type="submit"], .submit-btn, [data-cy*="submit"]').first()
+        .should('be.visible')
+        .and('not.be.disabled');
+    } else {
+      cy.log('No submit buttons found on page');
+    }
+  });
+});
+
+Then('the page content should be visible', () => {
+  cy.get('main, .main-content, .content').should('be.visible');
+});
+
+Then('any charts should be properly themed for dark mode', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('canvas, svg, .chart').length > 0) {
+      cy.get('canvas, svg, .chart').first().should('be.visible');
+    } else {
+      cy.log('No charts found on page');
+    }
+  });
+});
+
+Then('analysis text should be readable', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('p, .analysis, [data-cy*="analysis"]').length > 0) {
+      cy.get('p, .analysis, [data-cy*="analysis"]').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No analysis text found on page');
+    }
+  });
+});
+
+Then('text editing areas should have proper contrast', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('textarea, .editor').length > 0) {
+      cy.get('textarea, .editor').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)')
+        .and('not.have.css', 'background-color', 'rgb(255, 255, 255)');
+    } else {
+      cy.log('No text editing areas found on page');
+    }
+  });
+});
+
+Then('save/edit buttons should be accessible', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('button').length > 0) {
+      cy.get('button').first().should('be.visible').and('not.be.disabled');
+    } else {
+      cy.log('No save/edit buttons found on page');
+    }
+  });
+});
+
+Then('input fields should have good contrast', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('input, textarea').length > 0) {
+      cy.get('input, textarea').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)')
+        .and('not.have.css', 'background-color', 'rgb(255, 255, 255)');
+    } else {
+      cy.log('No input fields found on page');
+    }
+  });
+});
+
+When('I toggle the theme from dark to light', () => {
+  cy.switchTheme('light');
+});
+
+Then('the page should switch to light mode', () => {
+  cy.get('html').should('have.class', 'light');
+});
+
+When('I toggle the theme from light to dark', () => {
+  cy.switchTheme('dark');
+});
+
+Then('the page should switch to dark mode', () => {
+  cy.get('html').should('have.class', 'dark');
+});

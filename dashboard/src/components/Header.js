@@ -8,7 +8,7 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
     <header className="surface-card-elevated p-8 mb-8 relative z-[999] bg-gradient-to-r from-white via-white to-violet-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-violet-900/10">
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
         <div className="space-y-3">
-          <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Job Hunt Dashboard</h1>
+          <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight" data-testid="dashboard-title">Job Hunt Dashboard</h1>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
             <p className="text-neutral-600 dark:text-neutral-400 text-sm">
@@ -22,6 +22,7 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
             className="btn-secondary flex items-center space-x-2 relative z-10" 
             onClick={onAddJob} 
             disabled={isLoading}
+            data-testid="add-job-button"
           >
             <PlusIcon className="w-5 h-5" />
             <span>Add Job</span>
@@ -31,6 +32,7 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
             className="btn-success flex items-center space-x-2" 
             onClick={onRunHunt} 
             disabled={isLoading}
+            data-testid="run-hunt-button"
           >
             <MagnifyingGlassIcon className="w-5 h-5" />
             <span>Find New Jobs</span>

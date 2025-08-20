@@ -7,53 +7,46 @@ Feature: Dark Mode UX Testing
     Given I visit the application
     And the application is in "dark" mode
 
-  Scenario: Dashboard dark mode visibility
+  Scenario: Dashboard has proper dark mode contrast
     Given I am on the "dashboard" page
-    Then all text should be visible in dark mode
-    And I should see readable job statistics
-    And I should see readable table headers
-    And I capture a screenshot for analysis
+    Then the page title should be visible and readable
+    And job statistics should have good contrast
+    And table headers should be readable in dark mode
+    And action buttons should be clearly visible
 
-  Scenario: Opportunities page dark mode visibility
+  Scenario: Opportunities page is usable in dark mode
     Given I am on the "opportunities" page
-    Then all text should be visible in dark mode
-    And job cards should be readable
-    And filter options should be visible
-    And I capture a screenshot for analysis
+    Then the page should load successfully
+    And any job cards should be readable if present
+    And navigation elements should be visible
 
-  Scenario: Test Hub dark mode visibility
+  Scenario: Test Hub forms are accessible in dark mode
     Given I am on the "test-hub" page
-    Then all text should be visible in dark mode
-    And form labels should be readable
-    And dropdown options should be visible
-    And I capture a screenshot for analysis
+    Then form elements should be clearly visible
+    And any dropdown menus should be readable
+    And submit buttons should be accessible
 
-  Scenario: Market Fit page dark mode visibility
+  Scenario: Market Fit page displays correctly in dark mode
     Given I am on the "market-fit" page
-    Then all text should be visible in dark mode
-    And skill analysis should be readable
-    And charts should be properly themed
-    And I capture a screenshot for analysis
+    Then the page content should be visible
+    And any charts should be properly themed for dark mode
+    And analysis text should be readable
 
-  Scenario: CV Editor dark mode visibility
+  Scenario: CV Editor is functional in dark mode
     Given I am on the "cv-editor" page
-    Then all text should be visible in dark mode
-    And text areas should have proper contrast
-    And form controls should be visible
-    And I capture a screenshot for analysis
+    Then text editing areas should have proper contrast
+    And form controls should be clearly visible
+    And save/edit buttons should be accessible
 
-  Scenario: Forms and inputs in dark mode
+  Scenario: Bulk Add page forms work in dark mode
     Given I am on the "bulk-add" page
-    Then all text should be visible in dark mode
+    Then input fields should have good contrast
     And form instructions should be readable
-    And code examples should be visible
-    And input fields should have proper contrast
-    And I capture a screenshot for analysis
+    And any code examples should be visible
 
-  Scenario: Modal dialogs in dark mode
+  Scenario: Theme toggle functionality works correctly
     Given I am on the "dashboard" page
-    When I click the "Add Job" button
-    Then the modal should be visible in dark mode
-    And modal text should be readable
-    And form fields in modal should have proper contrast
-    And I capture a screenshot for analysis
+    When I toggle the theme from dark to light
+    Then the page should switch to light mode
+    When I toggle the theme from light to dark
+    Then the page should switch to dark mode

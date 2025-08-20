@@ -18,6 +18,7 @@ const TableRow = ({ item, columns, isExpanded, onToggleExpand, onRowClick }) => 
     <tr 
       onClick={handleRowClick} 
       className="hover:bg-violet-50/50 dark:hover:bg-violet-900/10 cursor-pointer transition-all duration-200 hover:shadow-sm group"
+      data-testid="opportunities-table-row"
     >
       {columns.map(col => (
         <td 
@@ -151,8 +152,8 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
 
       <div className="surface-card overflow-hidden">
         <div className="overflow-x-auto scrollbar-modern">
-          <table className="table-modern min-w-full table-fixed">
-            <thead>
+          <table className="table-modern min-w-full table-fixed" data-testid="opportunities-table">
+            <thead data-testid="opportunities-table-header">
               <tr>
                 {columns.map(col => (
                   <th 
@@ -179,7 +180,7 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-neutral-100 dark:divide-slate-800" data-testid="opportunities-table-body">
               {paginatedData.length > 0 ? paginatedData.map(item => (
                 <TableRow 
                   key={item.id} 

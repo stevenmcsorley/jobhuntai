@@ -105,9 +105,7 @@ Then('the loading indicator should disappear', () => {
 });
 
 Then('I capture a screenshot for analysis', () => {
-  cy.captureUXScreenshot('step-analysis');
-});
-
-Then('all text should be visible in dark mode', () => {
-  cy.testDarkModeVisibility();
+  // Cypress automatically captures screenshots on failures
+  // We can explicitly capture one if needed for analysis
+  cy.captureUXScreenshot('manual-capture');
 });

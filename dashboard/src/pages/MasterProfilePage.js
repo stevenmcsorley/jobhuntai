@@ -84,7 +84,7 @@ const MasterProfilePage = () => {
         <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-indigo-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-indigo-900/10">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
             <div className="space-y-3">
-              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Master Profile</h1>
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight" data-testid="master-profile-title">Master Profile</h1>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
                 <p className="text-neutral-600 dark:text-neutral-400 text-sm">
@@ -97,6 +97,7 @@ const MasterProfilePage = () => {
                 <button 
                   onClick={handleSeedProfile} 
                   className="btn-success flex items-center space-x-2"
+                  data-testid="import-cv-button"
                 >
                   <SparklesIcon className="w-5 h-5" />
                   <span>Import from cv.txt</span>
@@ -106,6 +107,7 @@ const MasterProfilePage = () => {
                 onClick={handleDownloadProfile} 
                 className="btn-secondary flex items-center space-x-2"
                 disabled={isProfileEmpty}
+                data-testid="download-profile-button"
               >
                 <ArrowDownTrayIcon className="w-5 h-5" />
                 <span>Download Profile</span>

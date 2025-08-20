@@ -24,7 +24,7 @@ const StatCard = ({ icon: Icon, value, label, variant = "primary", trend }) => {
   const colors = colorClasses[variant] || colorClasses.primary;
 
   return (
-    <div className="stats-card group">
+    <div className="stats-card group" data-testid={`stat-card-${label.toLowerCase().replace(/\s+/g, '-')}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className={`stats-card-icon ${colors.bg}`}>
@@ -46,7 +46,7 @@ const StatCard = ({ icon: Icon, value, label, variant = "primary", trend }) => {
 };
 
 const Stats = ({ jobsFound, appliedCount, followupCount, appliedToday, appliedThisWeek }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" data-testid="dashboard-stats">
     <StatCard
       icon={DocumentTextIcon}
       value={jobsFound}

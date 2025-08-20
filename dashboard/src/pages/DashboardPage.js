@@ -407,6 +407,7 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
             className="search-input flex-1 max-w-md"
             placeholder="Search for jobs by title, company, or location…"
             onChange={e => setSearchTerm(e.target.value)}
+            data-testid="dashboard-search-input"
           />
           <div className="flex items-center space-x-3">
             <input

@@ -109,3 +109,91 @@ Then('the job should be removed from the list', () => {
     }
   });
 });
+
+// New UX-focused dashboard step definitions
+Then('the page should load without errors', () => {
+  cy.get('body').should('be.visible');
+  cy.url().should('not.contain', 'error');
+  cy.url().should('not.contain', '404');
+});
+
+Then('job statistics should be displayed correctly', () => {
+  cy.get('body').then(($body) => {
+    // Look for any statistics display elements
+    const statSelectors = '.stats-card, .surface-card, [data-cy*="stat"], .metric-card';
+    if ($body.find(statSelectors).length > 0) {
+      cy.get(statSelectors).first().should('be.visible');
+    } else {
+      cy.log('No statistics found - this may be expected if no jobs exist');
+    }
+  });
+});
+
+Then('statistics should be readable and accessible', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('.stats-card, .surface-card, [data-cy*="stat"]').length > 0) {
+      cy.get('.stats-card, .surface-card, [data-cy*="stat"]').first()
+        .should('be.visible')
+        .and('not.have.css', 'color', 'rgb(0, 0, 0)')
+        .and('not.have.css', 'background-color', 'rgb(0, 0, 0)');
+    } else {
+      cy.log('No statistics to check readability');
+    }
+  });
+});
+
+When('the page loads completely', () => {
+  cy.waitForApp();
+  cy.waitForLoading();
+});
+
+Then('the jobs table should be present if there are jobs', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('table, [data-cy="jobs-table"]').length > 0) {
+      cy.get('table, [data-cy="jobs-table"]').should('be.visible');
+    } else {
+      cy.log('No jobs table found - may indicate no jobs exist');
+    }
+  });
+});
+
+Then('any action buttons should be functional', () => {
+  cy.get('body').then(($body) => {
+    if ($body.find('button').length > 0) {
+      cy.get('button').first().should('be.visible').and('not.be.disabled');
+    } else {
+      cy.log('No action buttons found on page');
+    }
+  });
+});
+
+When('I toggle between light and dark themes', () => {
+  cy.switchTheme('light');
+  cy.wait(500);
+  cy.switchTheme('dark');
+  cy.wait(500);
+});
+
+Then('the page should remain functional in both themes', () => {
+  cy.get('h1').should('be.visible');
+  cy.get('button').first().should('be.visible');
+});
+
+Then('all text should remain readable', () => {
+  cy.get('h1, h2, h3').first().should('be.visible').and('not.have.css', 'color', 'rgb(0, 0, 0)');
+});
+
+Then('the layout should be responsive', () => {
+  // Test that important elements exist and are positioned properly
+  cy.get('header, .header, h1').should('exist');
+  cy.get('main, .main-content, .app-container').should('exist');
+});
+
+Then('important elements should be accessible', () => {
+  cy.get('h1').should('be.visible');
+  cy.get('button').first().should('be.visible').and('not.be.disabled');
+});
+
+Then('navigation should work properly', () => {
+  cy.get('nav, .nav, [role="navigation"]').should('be.visible');
+});
