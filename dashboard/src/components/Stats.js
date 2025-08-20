@@ -1,42 +1,42 @@
 import React from 'react';
 import { DocumentTextIcon, CheckCircleIcon, CalendarDaysIcon, CalendarIcon } from '@heroicons/react/24/outline';
 
-const StatCard = ({ icon: Icon, value, label, variant = "blue", trend }) => {
+const StatCard = ({ icon: Icon, value, label, variant = "primary", trend }) => {
   const colorClasses = {
-    blue: {
-      bg: 'bg-blue-100 dark:bg-blue-900/30',
-      icon: 'text-blue-600 dark:text-blue-400'
+    primary: {
+      bg: 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30',
+      icon: 'text-violet-600 dark:text-violet-400'
     },
-    green: {
-      bg: 'bg-green-100 dark:bg-green-900/30',
-      icon: 'text-green-600 dark:text-green-400'
+    success: {
+      bg: 'bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30',
+      icon: 'text-emerald-600 dark:text-emerald-400'
     },
-    orange: {
-      bg: 'bg-orange-100 dark:bg-orange-900/30',
-      icon: 'text-orange-600 dark:text-orange-400'
+    warning: {
+      bg: 'bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30',
+      icon: 'text-amber-600 dark:text-amber-400'
     },
-    purple: {
-      bg: 'bg-purple-100 dark:bg-purple-900/30',
-      icon: 'text-purple-600 dark:text-purple-400'
+    info: {
+      bg: 'bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30',
+      icon: 'text-cyan-600 dark:text-cyan-400'
     }
   };
 
-  const colors = colorClasses[variant] || colorClasses.blue;
+  const colors = colorClasses[variant] || colorClasses.primary;
 
   return (
     <div className="stats-card group">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className={`p-3 rounded-xl ${colors.bg} group-hover:scale-110 transition-transform duration-200`}>
+          <div className={`stats-card-icon ${colors.bg}`}>
             <Icon className={`w-6 h-6 ${colors.icon}`} />
           </div>
           <div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">{label}</div>
+            <div className="stats-value">{value}</div>
+            <div className="stats-label">{label}</div>
           </div>
         </div>
         {trend && (
-          <div className={`text-sm font-medium ${trend > 0 ? 'text-green-600 dark:text-green-400' : trend < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+          <div className={trend > 0 ? 'stats-trend-up' : trend < 0 ? 'stats-trend-down' : 'stats-trend'}>
             {trend > 0 ? '+' : ''}{trend}%
           </div>
         )}
@@ -51,25 +51,25 @@ const Stats = ({ jobsFound, appliedCount, followupCount, appliedToday, appliedTh
       icon={DocumentTextIcon}
       value={jobsFound}
       label="Total Jobs Scraped"
-      variant="blue"
+      variant="primary"
     />
     <StatCard
       icon={CheckCircleIcon}
       value={appliedCount}
       label="Total Applications"
-      variant="green"
+      variant="success"
     />
     <StatCard
       icon={CalendarDaysIcon}
       value={appliedToday}
       label="Applied Today"
-      variant="orange"
+      variant="warning"
     />
     <StatCard
       icon={CalendarIcon}
       value={appliedThisWeek}
       label="Applied This Week"
-      variant="purple"
+      variant="info"
     />
   </div>
 );

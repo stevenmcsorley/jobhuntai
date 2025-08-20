@@ -273,24 +273,32 @@ const OpportunitiesPage = ({ applications, fetchData, onJobUpdate, onMatchComple
   ];
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="glass-card p-6">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
-            <div>
-              <h1 className="text-3xl font-bold text-gradient mb-2">Opportunities</h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                A curated list of high-match jobs found by the Proactive Job Hunter agent.
-              </p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-success font-bold tracking-tight">Opportunities</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  A curated list of high-match jobs found by the Proactive Job Hunter agent.
+                </p>
+              </div>
             </div>
-            <div className="flex-shrink-0 lg:w-80">
+            <div className="relative flex-shrink-0 lg:w-80">
               <input
                 type="text"
-                className="search-input"
-                placeholder="Search by title, company, or location..."
+                className="input-modern pl-12"
+                placeholder="Search opportunities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

@@ -5,31 +5,34 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
   const [showScrapeMenu, setShowScrapeMenu] = useState(false);
 
   return (
-    <header className="glass-card p-6 mb-8 relative z-[999]">
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient mb-2">Job Hunt Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Last Updated: <span className="font-medium text-gray-900 dark:text-white">{lastRun}</span>
-          </p>
+    <header className="surface-card-elevated p-8 mb-8 relative z-[999] bg-gradient-to-r from-white via-white to-violet-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-violet-900/10">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+        <div className="space-y-3">
+          <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Job Hunt Dashboard</h1>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+              Last Updated: <span className="font-semibold text-neutral-900 dark:text-white">{lastRun}</span>
+            </p>
+          </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-4">
           <button 
-            className="btn-primary flex items-center space-x-2" 
+            className="btn-secondary flex items-center space-x-2 relative z-10" 
             onClick={onAddJob} 
             disabled={isLoading}
           >
-            <PlusIcon className="w-4 h-4" />
+            <PlusIcon className="w-5 h-5" />
             <span>Add Job</span>
           </button>
           
           <button 
-            className="btn-primary flex items-center space-x-2 bg-green-600 hover:bg-green-700" 
+            className="btn-success flex items-center space-x-2" 
             onClick={onRunHunt} 
             disabled={isLoading}
           >
-            <MagnifyingGlassIcon className="w-4 h-4" />
+            <MagnifyingGlassIcon className="w-5 h-5" />
             <span>Find New Jobs</span>
           </button>
           
@@ -41,14 +44,14 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
             >
               {isLoading ? (
                 <>
-                  <div className="spinner"></div>
+                  <div className="spinner-modern w-5 h-5"></div>
                   <span>{progressMessage}</span>
                 </>
               ) : (
                 <>
-                  <CloudArrowDownIcon className="w-4 h-4" />
+                  <CloudArrowDownIcon className="w-5 h-5" />
                   <span>Manual Scrape</span>
-                  <ChevronDownIcon className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                 </>
               )}
             </button>
@@ -74,7 +77,7 @@ const Header = ({ lastRun, onRunScrape, onAddJob, onRunHunt, isLoading, progress
                     <span>All Sources</span>
                   </button>
                   
-                  <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
+                  <div className="dropdown-divider" />
                   
                   <button
                     className="dropdown-item flex items-center space-x-2 w-full"

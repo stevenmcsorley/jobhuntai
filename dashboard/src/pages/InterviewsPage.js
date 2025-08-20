@@ -6,16 +6,16 @@ const InterviewsPage = ({ interviews }) => {
   const pastInterviews = interviews.filter(i => new Date(i.interview_date) < new Date());
 
   const renderInterviewList = (title, list, isUpcoming = false) => (
-    <div className="glass-card animate-fade-in">
-      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="surface-card animate-fade-in">
+      <div className="px-6 py-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-3">
           {isUpcoming ? (
-            <ClockIcon className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <ClockIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <CheckCircleIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+            <CheckCircleIcon className="w-6 h-6 text-neutral-600 dark:text-neutral-400" />
           )}
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
-          <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-full text-sm font-medium">
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-white">{title}</h2>
+          <span className="bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 dark:from-violet-900/30 dark:to-purple-900/30 dark:text-violet-400 px-3 py-1 rounded-full text-sm font-medium">
             {list.length}
           </span>
         </div>
@@ -24,26 +24,26 @@ const InterviewsPage = ({ interviews }) => {
         {list.length > 0 ? (
           <div className="space-y-4">
             {list.map(interview => (
-              <div key={interview.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
+              <div key={interview.id} className="surface-card-soft p-4 hover:scale-[1.02] transition-all duration-200">
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{interview.job_title}</h3>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center space-x-1">
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{interview.job_title}</h3>
+                  <div className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
                     <CalendarDaysIcon className="w-4 h-4" />
                     <span>{new Date(interview.interview_date).toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-300">
                     <BuildingOfficeIcon className="w-4 h-4" />
                     <span><strong>Company:</strong> {interview.company_name}</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-300">
                     <ChatBubbleLeftRightIcon className="w-4 h-4" />
                     <span><strong>Type:</strong> {interview.interview_type}</span>
                   </div>
                   {interview.notes && (
-                    <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+                    <div className="mt-3 p-3 bg-neutral-50 dark:bg-slate-700/50 rounded-lg">
+                      <p className="text-sm text-neutral-700 dark:text-neutral-300 italic">
                         <strong>Notes:</strong> {interview.notes}
                       </p>
                     </div>
@@ -55,7 +55,7 @@ const InterviewsPage = ({ interviews }) => {
         ) : (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">📅</div>
-            <p className="text-gray-600 dark:text-gray-400">No interviews to display.</p>
+            <p className="text-neutral-600 dark:text-neutral-400">No interviews to display.</p>
           </div>
         )}
       </div>
@@ -64,24 +64,29 @@ const InterviewsPage = ({ interviews }) => {
 
   if (!interviews) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-6">
         <div className="flex items-center justify-center min-h-96">
-          <div className="spinner"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading interviews...</span>
+          <div className="spinner-modern w-8 h-8"></div>
+          <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading interviews...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="glass-card p-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gradient mb-2">Interview Hub</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your upcoming and past interviews.
-            </p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-purple-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-purple-900/10">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Interview Hub</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Manage your upcoming and past interviews
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

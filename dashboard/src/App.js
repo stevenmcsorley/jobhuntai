@@ -4,6 +4,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { safeJsonParse } from './utils/jsonUtils';
 import Sidebar from './components/Sidebar';
+import CommandPalette from './components/CommandPalette';
+import FloatingActionButton from './components/FloatingActionButton';
 import DashboardPage from './pages/DashboardPage';
 import TestHubPage from './pages/TestHubPage';
 import StatsPage from './pages/StatsPage';
@@ -24,11 +26,21 @@ function App() {
   const [matches, setMatches] = useState([]);
   const [stats, setStats] = useState({ appliedToday: 0, appliedThisWeek: 0, applicationsByDay: [], sourcePerformance: [], statusBreakdown: [] });
   const [interviews, setInterviews] = useState([]);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { theme } = useContext(ThemeContext);
 
+  // Command palette keyboard shortcut
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -107,9 +119,9 @@ function App() {
 
   return (
     <Router>
-      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="flex min-h-screen bg-neutral-50 dark:bg-slate-900 scrollbar-modern">
         <Sidebar />
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-hidden bg-dot-pattern">
           <Routes>
             <Route path="/" element={<DashboardPage applications={combinedApps} allJobs={jobs} fetchData={fetchData} onJobUpdate={handleJobUpdate} onMatchComplete={handleMatchResult} />} />
             <Route path="/opportunities" element={<OpportunitiesPage applications={combinedApps} fetchData={fetchData} onJobUpdate={handleJobUpdate} onMatchComplete={handleMatchResult} />} />
@@ -125,6 +137,13 @@ function App() {
             <Route path="/job/:id" element={<JobAnalysisPage onJobUpdate={handleJobUpdate} onApplicationUpdate={handleApplicationUpdate} onMatchComplete={handleMatchResult} />} />
           </Routes>
         </main>
+        <CommandPalette 
+          isOpen={commandPaletteOpen} 
+          onClose={() => setCommandPaletteOpen(false)} 
+        />
+        <FloatingActionButton 
+          onCommandPalette={() => setCommandPaletteOpen(true)}
+        />
       </div>
     </Router>
   );

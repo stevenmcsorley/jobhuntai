@@ -67,10 +67,10 @@ const MasterProfilePage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-6">
         <div className="flex items-center justify-center min-h-96">
-          <div className="spinner"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading profile...</span>
+          <div className="spinner-modern w-8 h-8"></div>
+          <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading profile...</span>
         </div>
       </div>
     );
@@ -79,21 +79,24 @@ const MasterProfilePage = () => {
   const isProfileEmpty = !profileData || !profileData.profile || !profileData.profile.id;
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="glass-card p-6">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-4 lg:space-y-0">
-            <div>
-              <h1 className="text-3xl font-bold text-gradient mb-2">Master Profile</h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Your central repository of skills, experiences, and projects for the AI to use.
-              </p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-indigo-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-indigo-900/10">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Master Profile</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Your central repository of skills, experiences, and projects for the AI to use
+                </p>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-3">
               {isProfileEmpty && (
                 <button 
                   onClick={handleSeedProfile} 
-                  className="btn-primary flex items-center space-x-2 bg-green-600 hover:bg-green-700"
+                  className="btn-success flex items-center space-x-2"
                 >
                   <SparklesIcon className="w-5 h-5" />
                   <span>Import from cv.txt</span>

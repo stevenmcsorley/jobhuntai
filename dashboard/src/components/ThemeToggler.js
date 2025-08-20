@@ -6,27 +6,48 @@ const ThemeToggler = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-3">
       <button
         onClick={toggleTheme}
-        className="relative flex items-center justify-center w-12 h-6 bg-gray-600 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+        className={`group relative flex items-center justify-center w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${
+          theme === 'dark' 
+            ? 'bg-gradient-to-r from-violet-600 to-purple-600 shadow-lg shadow-violet-500/25' 
+            : 'bg-gradient-to-r from-amber-400 to-orange-500 shadow-lg shadow-amber-500/25'
+        }`}
         aria-label="Toggle theme"
       >
+        {/* Background track */}
+        <div className="absolute inset-0 rounded-full bg-black/20"></div>
+        
+        {/* Sliding toggle */}
         <div
-          className={`absolute w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center ${
-            theme === 'dark' ? 'translate-x-3' : '-translate-x-3'
+          className={`absolute w-6 h-6 bg-white rounded-full shadow-xl transform transition-all duration-300 flex items-center justify-center group-hover:scale-110 ${
+            theme === 'dark' ? 'translate-x-3.5' : '-translate-x-3.5'
           }`}
         >
           {theme === 'dark' ? (
-            <MoonIcon className="w-3 h-3 text-gray-800" />
+            <MoonIcon className="w-3.5 h-3.5 text-slate-700" />
           ) : (
-            <SunIcon className="w-3 h-3 text-yellow-500" />
+            <SunIcon className="w-3.5 h-3.5 text-amber-600" />
           )}
         </div>
+        
+        {/* Glow effect */}
+        <div className={`absolute inset-0 rounded-full transition-opacity duration-300 ${
+          theme === 'dark' 
+            ? 'bg-violet-400/20 group-hover:bg-violet-400/30' 
+            : 'bg-amber-400/20 group-hover:bg-amber-400/30'
+        }`}></div>
       </button>
-      <span className="text-xs text-gray-300 font-medium min-w-max">
-        {theme === 'dark' ? 'Dark' : 'Light'}
-      </span>
+      
+      <div className="flex flex-col">
+        <span className="text-xs text-slate-300 font-semibold tracking-wide">
+          {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+        </span>
+        <span className="text-xs text-slate-500 font-medium">
+          {theme === 'dark' ? 'Enabled' : 'Disabled'}
+        </span>
+      </div>
     </div>
   );
 };

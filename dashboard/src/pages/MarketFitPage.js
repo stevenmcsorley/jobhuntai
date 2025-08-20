@@ -26,11 +26,11 @@ const MarketFitPage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center min-h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading Market Analysis...</span>
+            <div className="spinner-modern w-8 h-8"></div>
+            <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading Market Analysis...</span>
           </div>
         </div>
       </div>
@@ -39,28 +39,31 @@ const MarketFitPage = () => {
 
   if (!marketData || marketData.analysis.length === 0) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Gradient Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white">
-            <div className="flex items-center space-x-3">
-              <ChartBarIcon className="h-8 w-8" />
-              <div>
-                <h1 className="text-2xl font-bold">Market-Fit Analysis</h1>
-                <p className="text-purple-100">Analyze market demand for skills</p>
+      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-responsive">
+          <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-pink-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-pink-900/10">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+              <div className="space-y-3">
+                <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Market-Fit Analysis</h1>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                  <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                    Analyze market demand for skills
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Empty State */}
-          <div className="glass-card p-8">
+          <div className="surface-card p-8">
             <div className="text-center">
-              <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Data Available</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <ChartBarIcon className="mx-auto h-12 w-12 text-neutral-400 mb-4" />
+              <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-2">No Data Available</h3>
+              <p className="text-neutral-600 dark:text-neutral-400 mb-4">
                 No job descriptions have been analyzed yet.
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
+              <p className="text-sm text-neutral-500 dark:text-neutral-500">
                 Run a scrape or the proactive hunter to gather data, then come back to see which skills are most in-demand.
               </p>
             </div>
@@ -73,26 +76,27 @@ const MarketFitPage = () => {
   const topSkills = marketData.analysis.filter(skill => skill.count > 0);
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Gradient Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white">
-          <div className="flex items-center space-x-3">
-            <ChartBarIcon className="h-8 w-8" />
-            <div>
-              <h1 className="text-2xl font-bold">Market-Fit Analysis</h1>
-              <p className="text-purple-100">
-                Based on an analysis of {marketData.totalJobsAnalyzed} saved job descriptions
-              </p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-pink-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-pink-900/10">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Market-Fit Analysis</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Based on an analysis of {marketData.totalJobsAnalyzed} saved job descriptions
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Analysis Card */}
-        <div className="glass-card p-6">
+        <div className="surface-card p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Skills Analysis</h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">Skills Analysis</h2>
+            <p className="text-neutral-600 dark:text-neutral-400">
               This chart shows the percentage of jobs that mention a specific skill or technology. It helps you understand which skills are most valued by employers in the roles you are targeting.
             </p>
           </div>

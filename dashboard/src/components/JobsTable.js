@@ -26,7 +26,7 @@ const ModernDropdown = ({ children, trigger }) => {
           e.stopPropagation();
           setIsOpen((v) => !v);
         }}
-        className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-150 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+        className="btn-icon text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
       >
         {trigger}
       </button>
@@ -216,21 +216,23 @@ const JobsTable = ({ title, icon, jobs, columns, statsConfig, onAnalyze, analyzi
   ];
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <div className="glass-card">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center space-x-3">
-            <i className={`fas ${icon} text-blue-600 dark:text-blue-400`}></i>
-            <span className="text-gradient">{title}</span>
+    <div className="space-y-6 animate-fade-in">
+      <div className="surface-card-elevated">
+        <div className="px-8 py-6 border-b border-neutral-200 dark:border-slate-700 flex justify-between items-center">
+          <h2 className="text-display-md text-neutral-900 dark:text-white flex items-center space-x-4">
+            <div className="p-3 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-xl">
+              <i className={`fas ${icon} text-violet-600 dark:text-violet-400 text-lg`}></i>
+            </div>
+            <span className="text-gradient-primary font-bold tracking-tight">{title}</span>
           </h2>
           <TableStats data={jobs} config={statsConfig} />
         </div>
-        <div className="p-6 overflow-visible">
+        <div className="p-8 overflow-visible">
           <Table 
             columns={tableColumns} 
             data={jobs} 
             searchable={true} 
-            pageSize={10} 
+            pageSize={15} 
             onRowClick={(job) => navigate(`/job/${job.id}`, { state: { jobData: job } })}
           />
         </div>

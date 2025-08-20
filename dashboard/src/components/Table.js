@@ -17,13 +17,13 @@ const TableRow = ({ item, columns, isExpanded, onToggleExpand, onRowClick }) => 
   return (
     <tr 
       onClick={handleRowClick} 
-      className="hover:bg-blue-50/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200 hover:shadow-sm group"
+      className="hover:bg-violet-50/50 dark:hover:bg-violet-900/10 cursor-pointer transition-all duration-200 hover:shadow-sm group"
     >
       {columns.map(col => (
         <td 
           key={col.key} 
           className={`
-            px-3 py-4 text-sm text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-800 transition-all duration-200
+            px-6 py-4 text-sm text-neutral-900 dark:text-neutral-100 border-b border-neutral-100 dark:border-slate-800 transition-all duration-200
             ${col.className || ''} 
             ${!isExpanded && col.truncate ? 'truncate' : ''}
           `}
@@ -118,9 +118,9 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="spinner"></div>
-        <span className="ml-3 text-gray-600 dark:text-gray-400">Loading data...</span>
+      <div className="flex items-center justify-center py-16">
+        <div className="spinner-modern w-8 h-8"></div>
+        <span className="ml-3 text-neutral-600 dark:text-neutral-400 font-medium">Loading data...</span>
       </div>
     );
   }
@@ -129,22 +129,29 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
     <div className="space-y-4">
       {searchable && (
         <div className="flex justify-between items-center">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input max-w-md"
-          />
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Search jobs, companies, locations..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-modern pl-12"
+            />
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+          </div>
+          <div className="text-sm text-neutral-500 dark:text-slate-400 font-medium">
             {sortedData.length} {sortedData.length === 1 ? 'item' : 'items'}
           </div>
         </div>
       )}
 
-      <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto scrollbar-thin">
-          <table className="modern-table min-w-full table-fixed">
+      <div className="surface-card overflow-hidden">
+        <div className="overflow-x-auto scrollbar-modern">
+          <table className="table-modern min-w-full table-fixed">
             <thead>
               <tr>
                 {columns.map(col => (
@@ -152,10 +159,10 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
                     key={col.key}
                     onClick={() => col.sortable !== false && handleSort(col.key)}
                     className={`
-                      px-3 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider 
-                      bg-gray-50/80 dark:bg-gray-700/50 backdrop-blur-sm first:rounded-tl-lg last:rounded-tr-lg 
-                      border-b border-gray-200 dark:border-gray-700
-                      ${col.sortable !== false ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors duration-150' : ''}
+                      px-6 py-4 text-left text-xs font-semibold text-neutral-600 dark:text-neutral-400 uppercase tracking-wider 
+                      bg-neutral-50/80 dark:bg-slate-800/50 backdrop-blur-sm first:rounded-tl-xl last:rounded-tr-xl 
+                      border-b border-neutral-200 dark:border-slate-700
+                      ${col.sortable !== false ? 'cursor-pointer hover:bg-neutral-100 dark:hover:bg-slate-700/50 transition-colors duration-150' : ''}
                       ${col.width || ''}
                     `}
                     style={{ width: col.width }}
@@ -172,7 +179,7 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-y divide-neutral-100 dark:divide-slate-800">
               {paginatedData.length > 0 ? paginatedData.map(item => (
                 <TableRow 
                   key={item.id} 
@@ -184,14 +191,21 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
                 />
               )) : (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="text-4xl">📋</div>
-                      <div>No items to display</div>
+                  <td colSpan={columns.length} className="px-6 py-16 text-center text-neutral-500 dark:text-slate-400">
+                    <div className="flex flex-col items-center space-y-4 animate-fade-in">
+                      <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-2xl flex items-center justify-center">
+                        <div className="text-2xl">📋</div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="font-medium">No items to display</div>
+                        <div className="text-sm text-neutral-400 dark:text-slate-500">
+                          {searchTerm ? `No results found for "${searchTerm}"` : 'Start by adding some data'}
+                        </div>
+                      </div>
                       {searchTerm && (
                         <button 
                           onClick={() => setSearchTerm('')}
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm underline"
+                          className="btn-secondary text-sm"
                         >
                           Clear search
                         </button>
@@ -205,8 +219,8 @@ const Table = ({ columns, data, pageSize = 8, searchable = false, onRowClick }) 
         </div>
 
         {totalPages > 1 && (
-          <div className="px-6 py-4 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+          <div className="px-6 py-4 bg-neutral-50/50 dark:bg-slate-800/50 border-t border-neutral-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="text-sm text-neutral-700 dark:text-neutral-300 font-medium">
               Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} results
             </div>
             <div className="flex items-center space-x-2">
