@@ -51,14 +51,19 @@ const GuidancePage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="glass-card p-6">
-            <h1 className="text-3xl font-bold text-gradient mb-2">Guidance Hub</h1>
-            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+      <div className="h-full overflow-y-auto scrollbar-modern p-6">
+        <div className="max-w-7xl mx-auto space-y-responsive">
+          <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">Loading personalized guidance...</p>
+              </div>
+            </div>
           </div>
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="spinner-modern w-16 h-16"></div>
           </div>
         </div>
       </div>
@@ -67,33 +72,42 @@ const GuidancePage = () => {
 
   if (selectedTopic && learningPlan) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="glass-card p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-responsive">
+          <div className="surface-card-elevated p-8">
             <button 
-              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-6" 
+              className="btn-secondary inline-flex items-center gap-2 mb-6" 
               onClick={handleBack}
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Back to Summary
             </button>
             
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              Learning Plan for: <span className="text-blue-600 dark:text-blue-400">{selectedTopic}</span>
+            <h2 className="text-display-lg text-neutral-900 dark:text-white font-bold mb-6">
+              Learning Plan for: <span className="text-gradient-primary">{selectedTopic}</span>
             </h2>
             
-            <div className="mb-8 p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/30 rounded-r-lg">
-              <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Summary of Weaknesses</h3>
-              <p className="text-blue-700 dark:text-blue-300">{learningPlan.plan.summary_of_weaknesses}</p>
+            <div className="mb-8 surface-card-soft p-6 border-l-4 border-violet-500">
+              <h3 className="text-lg font-semibold text-violet-800 dark:text-violet-200 mb-3">Summary of Weaknesses</h3>
+              <p className="text-violet-700 dark:text-violet-300">{learningPlan.plan.summary_of_weaknesses}</p>
             </div>
 
             {learningPlan.plan.learning_plan && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">📚 Learning Plan</h3>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center space-x-2">
+                  <span>📚</span><span>Learning Plan</span>
+                </h3>
                 <div className="space-y-3">
                   {learningPlan.plan.learning_plan.map((step, index) => (
-                    <div key={index} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-md shadow-sm">
-                      {typeof step === 'string' ? step : step.step || step}
+                    <div key={index} className="surface-card-soft p-4 hover:scale-[1.01] transition-all duration-200">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-violet-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                          {index + 1}
+                        </div>
+                        <div className="text-neutral-700 dark:text-neutral-300">
+                          {typeof step === 'string' ? step : step.step || step}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -101,33 +115,33 @@ const GuidancePage = () => {
             )}
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Questions You Missed</h3>
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Questions You Missed</h3>
               <div className="space-y-6">
                 {incorrectResults.map(result => (
-                  <div key={result.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800/50">
-                       <p className="font-semibold text-gray-800 dark:text-gray-200">
+                  <div key={result.id} className="surface-card overflow-hidden">
+                    <div className="p-4 surface-card-soft">
+                       <p className="font-semibold text-neutral-800 dark:text-neutral-200">
                          <strong>Question:</strong> {result.question_text}
                        </p>
                     </div>
                     <div className="p-4 space-y-4">
                       <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Your Answer:</p>
-                        <pre className="p-3 rounded bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm whitespace-pre-wrap font-mono">
+                        <p className="font-medium text-neutral-700 dark:text-neutral-300 mb-2">Your Answer:</p>
+                        <pre className="p-3 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 text-sm whitespace-pre-wrap font-mono">
                           {result.user_answer || 'No answer provided.'}
                         </pre>
                       </div>
                       
                       <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Feedback:</p>
-                        <div className="p-3 rounded bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-sm">
+                        <p className="font-medium text-neutral-700 dark:text-neutral-300 mb-2">Feedback:</p>
+                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-sm">
                           {result.feedback}
                         </div>
                       </div>
 
                       <div>
-                        <p className="font-medium text-gray-700 dark:text-gray-300 mb-2">Correct Answer:</p>
-                        <div className="p-3 rounded bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-sm">
+                        <p className="font-medium text-neutral-700 dark:text-neutral-300 mb-2">Correct Answer:</p>
+                        <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-sm">
                           {result.correct_answer}
                         </div>
                       </div>
@@ -144,43 +158,51 @@ const GuidancePage = () => {
 
   if (summary.length > 0) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="glass-card p-6">
-            <h1 className="text-3xl font-bold text-gradient mb-2">Guidance Hub</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Personalized feedback and learning plans based on your test results.
-            </p>
+      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+        <div className="max-w-7xl mx-auto space-y-responsive">
+          <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Personalized feedback and learning plans based on your test results
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="glass-card p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Your Improvement Areas</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <div className="surface-card p-6">
+            <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">Your Improvement Areas</h2>
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6">
               Here are the topics you have the lowest average scores in. Click one to get a personalized learning plan.
             </p>
             <div className="space-y-3">
               {summary.map(item => (
                 <button 
                   key={item.skill} 
-                  className="w-full text-left p-4 rounded-lg transition-all duration-200 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full text-left p-4 surface-card-soft hover:scale-[1.02] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
                   onClick={() => handleSelectTopic(item.skill)}
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex-1">
-                      <span className="font-medium text-gray-800 dark:text-gray-200">{item.skill}</span>
+                      <span className="font-medium text-neutral-800 dark:text-neutral-200">{item.skill}</span>
                       {item.progress && (
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-neutral-500 mt-1">
                           <FontAwesomeIcon 
                             icon={item.progress.trend === 'improving' ? faArrowTrendUp : 
                                   item.progress.trend === 'declining' ? faArrowTrendDown : faMinus} 
-                            className="mr-1"
+                            className={`mr-1 ${
+                              item.progress.trend === 'improving' ? 'text-emerald-600' :
+                              item.progress.trend === 'declining' ? 'text-red-600' : 'text-neutral-500'
+                            }`}
                           />
                           {item.progress.trend}
                         </div>
                       )}
                     </div>
-                    <span className={`text-sm font-bold px-2 py-1 rounded-full ${
-                      item.average_score >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' :
-                      item.average_score >= 50 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                      item.average_score >= 70 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                      item.average_score >= 50 ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' :
                       'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
                       {Math.round(item.average_score)}%
@@ -196,17 +218,25 @@ const GuidancePage = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="glass-card p-6">
-          <h1 className="text-3xl font-bold text-gradient mb-2">Guidance Hub</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Personalized feedback and learning plans based on your test results.
-          </p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
+          <div className="space-y-3">
+            <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                Personalized feedback and learning plans based on your test results
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="text-center glass-card p-8">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No Guidance Available</h3>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <div className="text-center surface-card p-8">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-emerald-100 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-full flex items-center justify-center mb-4">
+            <span className="text-2xl">📚</span>
+          </div>
+          <h3 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">No Guidance Available</h3>
+          <p className="text-neutral-600 dark:text-neutral-400">
             Complete some tests in the Test Hub to get personalized feedback and learning plans.
           </p>
         </div>

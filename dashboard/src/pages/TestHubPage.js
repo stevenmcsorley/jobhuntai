@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AcademicCapIcon, ClockIcon } from '@heroicons/react/24/outline';
+import CodeEditor from '../components/CodeEditor';
 
 // --- Sub-components ---
 
@@ -27,17 +28,17 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
   };
 
   return (
-    <div className="glass-card p-6">
+    <div className="surface-card p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Start a New Test</h2>
-        <p className="text-gray-600 dark:text-gray-400">Select a topic, difficulty, and test type to begin.</p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-white mb-2">Start a New Test</h2>
+        <p className="text-neutral-600 dark:text-neutral-400">Select a topic, difficulty, and test type to begin.</p>
       </div>
         
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Test Type</label>
+            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Test Type</label>
             <select 
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+              className="input-modern" 
               value={type} 
               onChange={e => setType(e.target.value)}
             >
@@ -60,9 +61,9 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
           {!isBehavioral && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topic (Suggested from Market Fit)</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Topic (Suggested from Market Fit)</label>
                 <select 
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  className="input-modern" 
                   value={skill} 
                   onChange={e => setSkill(e.target.value)} 
                   disabled={!!customSkill}
@@ -72,10 +73,10 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Or Enter a Custom Topic</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Or Enter a Custom Topic</label>
                 <input 
                   type="text" 
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  className="input-modern" 
                   placeholder="e.g., JavaScript Higher-Order Functions"
                   value={customSkill}
                   onChange={e => setCustomSkill(e.target.value)}
@@ -83,9 +84,9 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Difficulty</label>
                 <select 
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  className="input-modern" 
                   value={difficulty} 
                   onChange={e => setDifficulty(e.target.value)}
                 >
@@ -98,7 +99,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
           )}
         
           <button 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+            className="btn-primary w-full" 
             onClick={handleStart}
           >
             Start Test
@@ -117,28 +118,30 @@ const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, 
   };
 
   return (
-    <div className="glass-card p-6">
-      <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="surface-card p-6">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Topic: {session.skill}</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
           {session.difficulty !== 'N/A' && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">({session.difficulty})</span>
+            <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
           )}
         </div>
-        <span className="text-sm text-gray-500 dark:text-gray-400">Question {questionNumber} of {totalQuestions}</span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
       </div>
       
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Question:</h3>
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            {question.question_text}
-          </p>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Question:</h3>
+          <div className="surface-card-soft p-4">
+            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+              {question.question_text}
+            </p>
+          </div>
         </div>
         
         <div>
           <textarea 
-            className="w-full h-48 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+            className="textarea-modern h-48 resize-none" 
             value={answer} 
             onChange={e => setAnswer(e.target.value)}
             placeholder="Your answer..."
@@ -146,7 +149,7 @@ const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, 
         </div>
         
         <button 
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" 
+          className="btn-success w-full" 
           onClick={handleSubmit}
         >
           Submit Answer
@@ -170,21 +173,23 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
   };
 
   return (
-    <div className="glass-card p-6">
-      <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div className="surface-card p-6">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-900 dark:text-white">Topic: {session.skill}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">({session.difficulty})</span>
+          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
+          <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
         </div>
-        <span className="text-sm text-gray-500 dark:text-gray-400">Question {questionNumber} of {totalQuestions}</span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
       </div>
       
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Question:</h3>
-          <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            {question.question_text}
-          </p>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Question:</h3>
+          <div className="surface-card-soft p-4">
+            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+              {question.question_text}
+            </p>
+          </div>
         </div>
         
         <div className="space-y-3">
@@ -193,8 +198,8 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
               key={index}
               className={`flex items-center p-4 rounded-lg border cursor-pointer transition-all ${
                 selectedOption === option 
-                  ? 'bg-blue-100 dark:bg-blue-900/50 border-blue-500' 
-                  : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'surface-card-soft border-violet-500 ring-2 ring-violet-200 dark:ring-violet-800' 
+                  : 'surface-card-soft border-neutral-300 dark:border-slate-600 hover:border-violet-300 dark:hover:border-violet-700'
               }`}
             >
               <input 
@@ -205,13 +210,13 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
                 checked={selectedOption === option}
                 onChange={() => setSelectedOption(option)}
               />
-              <span className="ml-3 text-gray-900 dark:text-white">{option}</span>
+              <span className="ml-3 text-neutral-900 dark:text-white">{option}</span>
             </label>
           ))}
         </div>
         
         <button 
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" 
+          className="btn-success w-full" 
           onClick={handleSubmit}
           disabled={!selectedOption}
         >
@@ -222,6 +227,85 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
   );
 };
 
+const CodeChallengeTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions }) => {
+  const [code, setCode] = useState('');
+  const [language, setLanguage] = useState('javascript');
+
+  // Extract initial code from question if it exists
+  useEffect(() => {
+    if (question?.initial_code) {
+      setCode(question.initial_code);
+    } else {
+      // Set default starter code based on language
+      const starterCode = {
+        javascript: '// Write your solution here\nfunction solution() {\n    \n}\n\n// Test your solution\nconsole.log(solution());',
+        python: '# Write your solution here\ndef solution():\n    pass\n\n# Test your solution\nprint(solution())',
+        java: '// Write your solution here\npublic class Solution {\n    public static void main(String[] args) {\n        // Test your solution\n        System.out.println("Hello World");\n    }\n}',
+        cpp: '#include <iostream>\nusing namespace std;\n\n// Write your solution here\nint main() {\n    // Test your solution\n    cout << "Hello World" << endl;\n    return 0;\n}'
+      };
+      setCode(starterCode[language] || starterCode.javascript);
+    }
+  }, [question, language]);
+
+  const handleSubmit = () => {
+    if (!code.trim()) {
+      toast.warn('Please write some code before submitting.');
+      return;
+    }
+    onAnswerSubmit(question.id, code);
+  };
+
+  return (
+    <div className="surface-card p-6">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium text-neutral-900 dark:text-white">Topic: {session.skill}</span>
+          <span className="text-sm text-neutral-500 dark:text-neutral-400">({session.difficulty})</span>
+        </div>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">Question {questionNumber} of {totalQuestions}</span>
+      </div>
+      
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-3">Challenge:</h3>
+          <div className="surface-card-soft p-4">
+            <p className="text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap">
+              {question.question_text}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-4 mb-4">
+          <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Language:</label>
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value)}
+            className="input-modern w-auto"
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+          </select>
+        </div>
+        
+        <CodeEditor
+          language={language}
+          initialValue={code}
+          onChange={(value) => setCode(value || '')}
+          onRun={(code) => console.log('Running code:', code)}
+        />
+        
+        <button 
+          className="btn-success w-full flex items-center justify-center space-x-2" 
+          onClick={handleSubmit}
+        >
+          <span>Submit Solution</span>
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const BehavioralResults = ({ session, results, onRestart, onRetake, incorrectCount }) => {
   const frameworkName = session.type.split('_')[1].toUpperCase();
@@ -579,6 +663,7 @@ const TestHubPage = () => {
     switch (view) {
       case 'active':
         if (!session || !currentQuestion) return null;
+        
         if (session.type === 'multiple_choice') {
           return (
             <MultipleChoiceTestSession
@@ -590,6 +675,19 @@ const TestHubPage = () => {
             />
           );
         }
+        
+        if (session.type === 'code_challenge') {
+          return (
+            <CodeChallengeTestSession
+              session={session}
+              question={currentQuestion}
+              onAnswerSubmit={handleAnswerSubmit}
+              questionNumber={questionCount.current}
+              totalQuestions={questionCount.total}
+            />
+          );
+        }
+        
         return (
           <ActiveTestSession 
             session={session} 
@@ -614,33 +712,34 @@ const TestHubPage = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Gradient Header */}
-        <div className="bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <AcademicCapIcon className="h-8 w-8" />
-              <div>
-                <h1 className="text-2xl font-bold">Test Hub</h1>
-                <p className="text-cyan-100">Practice and improve your technical skills</p>
+    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+      <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-cyan-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-cyan-900/10">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div className="space-y-3">
+              <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Test Hub</h1>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  Practice and improve your technical skills with AI-generated questions
+                </p>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap items-center gap-3">
               <button 
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white/50" 
+                className={`btn-secondary ${view === 'config' ? 'bg-violet-100 dark:bg-violet-900/50' : ''}`.trim()} 
                 onClick={() => setView('config')}
               >
                 New Test
               </button>
               <button 
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white/50" 
+                className={`btn-secondary ${view === 'history' ? 'bg-violet-100 dark:bg-violet-900/50' : ''}`.trim()} 
                 onClick={() => setView('history')}
               >
                 History
               </button>
               <button 
-                className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-white/50" 
+                className={`btn-secondary ${view === 'prompts' ? 'bg-violet-100 dark:bg-violet-900/50' : ''}`.trim()} 
                 onClick={() => setView('prompts')}
               >
                 Prompt Matrix
@@ -651,8 +750,8 @@ const TestHubPage = () => {
         
         {isLoading ? (
           <div className="flex items-center justify-center min-h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+            <div className="spinner-modern w-8 h-8"></div>
+            <span className="ml-3 text-neutral-600 dark:text-neutral-400">Loading...</span>
           </div>
         ) : (
           renderView()

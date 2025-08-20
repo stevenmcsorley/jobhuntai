@@ -10,6 +10,7 @@ import JobsTable from '../components/JobsTable';
 import DashboardChart from '../components/DashboardChart';
 import AddJobModal from '../components/AddJobModal';
 import AddInterviewModal from '../components/AddInterviewModal';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 import { faCalendarAlt, faExclamationCircle, faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
@@ -50,6 +51,7 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
   const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [stats, setStats] = useState({ appliedToday: 0, appliedThisWeek: 0, applicationsByDay: [] });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
 
   useEffect(() => {
@@ -59,6 +61,8 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
             setStats(statsRes.data);
         } catch (error) {
             console.error("Error fetching stats:", error);
+        } finally {
+            setIsInitialLoading(false);
         }
     };
     getStats();
@@ -338,6 +342,34 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
     }
   ];
 
+  if (isInitialLoading && (!applications || applications.length === 0)) {
+    return (
+      <div className="h-full overflow-y-auto scrollbar-modern p-6">
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
+        <div className="max-w-7xl mx-auto space-y-responsive">
+          <SkeletonLoader type="header" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <SkeletonLoader type="statsCard" count={5} />
+          </div>
+          
+          <SkeletonLoader type="chart" />
+          
+          <div className="space-y-8">
+            <div className="surface-card p-6 space-y-4">
+              <SkeletonLoader type="line-medium" />
+              <SkeletonLoader type="jobCard" count={3} />
+            </div>
+            <div className="surface-card p-6 space-y-4">
+              <SkeletonLoader type="line-medium" />
+              <SkeletonLoader type="jobCard" count={5} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
@@ -360,9 +392,9 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
           appliedThisWeek={stats.appliedThisWeek}
         />
         
-        <div className="glass-card p-6">
+        <div className="surface-card p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Application Trends</h3>
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Application Trends</h3>
             <div style={{ height: '350px' }}>
               <DashboardChart data={stats.applicationsByDay} />
             </div>
