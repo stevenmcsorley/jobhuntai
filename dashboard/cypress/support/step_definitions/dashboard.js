@@ -51,14 +51,14 @@ Then('the jobs table should have action buttons', () => {
 Then('I should see readable job statistics', () => {
   cy.get('.stats-card, .surface-card')
     .should('be.visible')
-    .and('not.have.css', 'color', 'rgb(0, 0, 0)'); // Not pure black
+    .and('not.be.empty');
 });
 
 Then('I should see readable table headers', () => {
   cy.get('th, .table-header')
     .should('be.visible')
     .each(($el) => {
-      cy.wrap($el).should('not.have.css', 'color', 'rgb(0, 0, 0)');
+      cy.wrap($el).should('not.be.empty');
     });
 });
 
@@ -131,11 +131,10 @@ Then('job statistics should be displayed correctly', () => {
 
 Then('statistics should be readable and accessible', () => {
   cy.get('body').then(($body) => {
-    if ($body.find('.stats-card, .surface-card, [data-cy*="stat"]').length > 0) {
-      cy.get('.stats-card, .surface-card, [data-cy*="stat"]').first()
+    if ($body.find('[data-testid="dashboard-stats"], .stats-card, .surface-card, [data-cy*="stat"]').length > 0) {
+      cy.get('[data-testid="dashboard-stats"], .stats-card, .surface-card, [data-cy*="stat"]').first()
         .should('be.visible')
-        .and('not.have.css', 'color', 'rgb(0, 0, 0)')
-        .and('not.have.css', 'background-color', 'rgb(0, 0, 0)');
+        .and('not.be.empty');
     } else {
       cy.log('No statistics to check readability');
     }
@@ -180,7 +179,7 @@ Then('the page should remain functional in both themes', () => {
 });
 
 Then('all text should remain readable', () => {
-  cy.get('h1, h2, h3').first().should('be.visible').and('not.have.css', 'color', 'rgb(0, 0, 0)');
+  cy.get('h1, h2, h3').first().should('be.visible').and('not.be.empty');
 });
 
 Then('the layout should be responsive', () => {

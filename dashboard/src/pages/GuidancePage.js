@@ -51,8 +51,8 @@ const GuidancePage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6">
-        <div className="max-w-7xl mx-auto space-y-responsive">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
+        <div className="max-w-screen-2xl mx-auto space-y-responsive">
           <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
             <div className="space-y-3">
               <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>
@@ -72,8 +72,8 @@ const GuidancePage = () => {
 
   if (selectedTopic && learningPlan) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-responsive">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+        <div className="max-w-screen-2xl mx-auto space-y-responsive">
           <div className="surface-card-elevated p-8">
             <button 
               className="btn-secondary inline-flex items-center gap-2 mb-6" 
@@ -89,7 +89,10 @@ const GuidancePage = () => {
             
             <div className="mb-8 surface-card-soft p-6 border-l-4 border-violet-500">
               <h3 className="text-lg font-semibold text-violet-800 dark:text-violet-200 mb-3">Summary of Weaknesses</h3>
-              <p className="text-violet-700 dark:text-violet-300">{learningPlan.plan.summary_of_weaknesses}</p>
+              <p className="text-violet-700 dark:text-violet-300">
+                {learningPlan.plan.summary_of_weaknesses || 
+                 (incorrectResults.length === 0 ? "No weaknesses found for this topic!" : "Analysis in progress...")}
+              </p>
             </div>
 
             {learningPlan.plan.learning_plan && (
@@ -116,8 +119,26 @@ const GuidancePage = () => {
 
             <div>
               <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Questions You Missed</h3>
-              <div className="space-y-6">
-                {incorrectResults.map(result => (
+              {incorrectResults.length === 0 ? (
+                <div className="surface-card p-6 text-center">
+                  <div className="mx-auto w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl">✅</span>
+                  </div>
+                  <h4 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">Great Work!</h4>
+                  <p className="text-neutral-600 dark:text-neutral-400">
+                    You haven't answered any questions on this topic incorrectly. Keep up the great work!
+                  </p>
+                  {/* Note about trend if it shows declining */}
+                  <div className="mt-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700">
+                    <p className="text-sm text-blue-800 dark:text-blue-300">
+                      <strong>Note:</strong> If you see this topic marked as "declining" in the summary, it may be due to:
+                      recent test timing, fewer recent attempts, or comparative performance analysis.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {incorrectResults.map(result => (
                   <div key={result.id} className="surface-card overflow-hidden">
                     <div className="p-4 surface-card-soft">
                        <p className="font-semibold text-neutral-800 dark:text-neutral-200">
@@ -147,8 +168,9 @@ const GuidancePage = () => {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -158,8 +180,8 @@ const GuidancePage = () => {
 
   if (summary.length > 0) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-responsive">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+        <div className="max-w-screen-2xl mx-auto space-y-responsive">
           <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
             <div className="space-y-3">
               <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>
@@ -218,8 +240,8 @@ const GuidancePage = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-responsive">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+      <div className="max-w-screen-2xl mx-auto space-y-responsive">
         <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-emerald-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-emerald-900/10">
           <div className="space-y-3">
             <h1 className="text-display-xl text-gradient-primary font-bold tracking-tight">Guidance Hub</h1>

@@ -58,15 +58,17 @@ const BulkAddPage = ({ fetchData }) => {
   };
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+      <div className="max-w-screen-2xl mx-auto space-y-6">
         {/* Gradient Header */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg p-6 text-white">
-          <div className="flex items-center space-x-3">
-            <CloudArrowUpIcon className="h-8 w-8" />
-            <div>
-              <h1 className="text-2xl font-bold">Bulk Add Jobs</h1>
-              <p className="text-emerald-100">Import multiple job listings from JSON data</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <CloudArrowUpIcon className="h-8 w-8" />
+              <div>
+                <h1 className="text-2xl font-bold">Bulk Add Jobs</h1>
+                <p className="text-emerald-100">Import multiple job listings from JSON data</p>
+              </div>
             </div>
           </div>
         </div>

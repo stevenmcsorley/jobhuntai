@@ -39,8 +39,8 @@ const CVEditorPage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
+        <div className="max-w-screen-2xl mx-auto">
           <div className="flex items-center justify-center min-h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-3 text-gray-600 dark:text-gray-300">Loading CV...</span>
@@ -51,8 +51,8 @@ const CVEditorPage = () => {
   }
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+      <div className="max-w-screen-2xl mx-auto space-y-6">
         {/* Gradient Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
           <div className="flex items-center space-x-3">

@@ -26,8 +26,8 @@ const MarketFitPage = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
+        <div className="max-w-screen-2xl mx-auto">
           <div className="flex items-center justify-center min-h-64">
             <div className="spinner-modern w-8 h-8"></div>
             <span className="ml-3 text-neutral-600 dark:text-neutral-400" data-testid="loading-text">Loading Market Analysis...</span>
@@ -39,8 +39,8 @@ const MarketFitPage = () => {
 
   if (!marketData || marketData.analysis.length === 0) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-responsive">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+        <div className="max-w-screen-2xl mx-auto space-y-responsive">
           <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-pink-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-pink-900/10">
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
               <div className="space-y-3">
@@ -76,8 +76,8 @@ const MarketFitPage = () => {
   const topSkills = marketData.analysis.filter(skill => skill.count > 0);
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
-      <div className="max-w-7xl mx-auto space-y-responsive">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+      <div className="max-w-screen-2xl mx-auto space-y-responsive">
         <div className="surface-card-elevated p-8 bg-gradient-to-r from-white via-white to-pink-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-pink-900/10">
           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
             <div className="space-y-3">

@@ -344,9 +344,9 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
 
   if (isInitialLoading && (!applications || applications.length === 0)) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-modern p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
         <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
-        <div className="max-w-7xl mx-auto space-y-responsive">
+        <div className="max-w-screen-2xl mx-auto space-y-responsive">
           <SkeletonLoader type="header" />
           
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
@@ -371,10 +371,10 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
   }
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-modern p-6 animate-fade-in">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
       <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
       
-      <div className="max-w-7xl mx-auto space-y-responsive">
+      <div className="max-w-screen-2xl mx-auto space-y-responsive">
         <Header
           lastRun={lastRun}
           onRunScrape={handleRunScrape}

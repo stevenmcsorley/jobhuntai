@@ -29,12 +29,12 @@ const Sidebar = ({ opportunitiesCount = 0 }) => {
   ];
 
   return (
-    <div className={`sidebar-modern flex flex-col transition-all duration-500 ease-in-out ${isCollapsed ? 'w-20' : 'w-72'} min-h-screen relative overflow-hidden`}>
+    <div className={`sidebar-modern flex flex-col transition-all duration-500 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} min-h-screen relative overflow-hidden`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
       {/* Header */}
-      <div className="relative z-10 p-6 border-b border-slate-700/50">
+      <div className="relative z-10 p-4 border-b border-slate-700/50">
         <div className="flex items-center space-x-4">
           <div className="relative p-3 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 rounded-2xl shadow-2xl ring-2 ring-violet-500/30">
             <FontAwesomeIcon icon={faBriefcase} className="text-white w-7 h-7" />

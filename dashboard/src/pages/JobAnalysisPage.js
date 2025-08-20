@@ -324,10 +324,10 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
 
   if (loading) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
         <div className="flex items-center justify-center min-h-96">
-          <div className="spinner"></div>
-          <span className="ml-3 text-gray-600 dark:text-gray-400">Loading job details...</span>
+          <div className="spinner-modern w-8 h-8"></div>
+          <span className="ml-3 text-neutral-600 dark:text-neutral-400" data-testid="loading-text">Loading job details...</span>
         </div>
       </div>
     );
@@ -335,14 +335,15 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
 
   if (!job) {
     return (
-      <div className="h-full overflow-y-auto scrollbar-thin p-6">
+      <div className="h-full overflow-y-auto scrollbar-modern p-4">
         <div className="text-center py-12">
           <div className="text-4xl mb-4">🚫</div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Job Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">The job you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2" data-testid="error-title">Job Not Found</h2>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-4">The job you're looking for doesn't exist.</p>
           <button 
             onClick={() => navigate('/')} 
             className="btn-primary"
+            data-testid="back-to-dashboard-button"
           >
             Back to Dashboard
           </button>
@@ -375,19 +376,21 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
   const matchResult = job;
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="glass-card p-6">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
+      <div className="max-w-screen-2xl mx-auto space-y-responsive">
+        {/* Header Card */}
+        <div className="surface-card-elevated p-6 bg-gradient-to-r from-white via-white to-blue-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-blue-900/10" data-testid="job-details-header">
           <div className="flex items-center space-x-4 mb-4">
             <button 
               onClick={() => navigate(-1)} 
-              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors duration-200"
+              className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-full transition-colors duration-200"
+              data-testid="back-button"
             >
-              <ArrowLeftIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              <ArrowLeftIcon className="w-5 h-5 text-neutral-600 dark:text-neutral-300" />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-gradient">{job.title}</h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-600 dark:text-gray-300 mt-2">
+              <h1 className="text-display-lg text-gradient-primary font-bold tracking-tight" data-testid="job-title">{job.title}</h1>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-neutral-600 dark:text-neutral-300 mt-3">
                 <div className="flex items-center space-x-1">
                   <BuildingOfficeIcon className="w-4 h-4" />
                   <span>{job.company}</span>
@@ -413,17 +416,18 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex space-x-6">
+          <div className="border-b border-neutral-200 dark:border-neutral-700 mt-6" data-testid="job-tabs">
+            <nav className="-mb-px flex space-x-6 overflow-x-auto scrollbar-none">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`whitespace-nowrap flex items-center py-3 px-1 border-b-2 font-medium text-sm transition-all duration-200 ${
                     activeTab === tab.id 
-                      ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400' 
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100 dark:hover:border-gray-400'
+                      ? 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400' 
+                      : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300 dark:text-neutral-400 dark:hover:text-neutral-200 dark:hover:border-neutral-500'
                   }`}
+                  data-testid={`tab-${tab.id}`}
                 >
                   <tab.icon className="w-5 h-5 mr-2" />
                   <span>{tab.label}</span>
@@ -434,9 +438,9 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
         </div>
 
         {/* Content */}
-        <div className="glass-card p-6">
+        <div className="surface-card p-6" data-testid="job-content">
           {/* Status Updater */}
-          <div className="flex items-center justify-end mb-6">
+          <div className="flex items-center justify-end mb-6" data-testid="status-updater-section">
             <StatusUpdater application={job} onUpdate={handleLocalApplicationUpdate} />
           </div>
 
@@ -444,41 +448,55 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
           {activeTab === 'description' && (
             <div>
               <textarea
-                className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none font-mono text-sm"
+                className="w-full h-96 p-4 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 resize-none font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 value={editableDescription}
                 onChange={(e) => setEditableDescription(e.target.value)}
                 placeholder="Job description will appear here..."
+                data-testid="job-description-textarea"
               />
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-3 mt-4">
                 <button 
                   className="btn-primary" 
                   onClick={handleDescriptionSave}
                   disabled={analyzing}
+                  data-testid="save-description-button"
                 >
-                  {analyzing ? 'Saving...' : 'Save Description'}
+                  {analyzing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Saving...
+                    </>
+                  ) : 'Save Description'}
                 </button>
                 <button 
                   className="btn-secondary" 
                   onClick={handleExtractSkills}
                   disabled={isExtractingSkills || !hasDescription}
                   title={!hasDescription ? 'Please save a description first' : ''}
+                  data-testid="extract-skills-button"
                 >
-                  {isExtractingSkills ? 'Extracting...' : 'Extract Skills'}
+                  {isExtractingSkills ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Extracting...
+                    </>
+                  ) : 'Extract Skills'}
                 </button>
               </div>
               {skills.length > 0 && (
                 <div className="mt-6">
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Extracted Skills</h4>
+                  <h4 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4" data-testid="skills-section-title">Extracted Skills</h4>
                   <div className="flex flex-wrap gap-2">
                     {skills.map((skill, index) => (
-                      <div key={index} className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 transition-all duration-200 hover:shadow-sm">
+                      <div key={index} className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300 transition-all duration-200 hover:shadow-sm border border-primary-200 dark:border-primary-700" data-testid={`skill-tag-${index}`}>
                         <span>{skill}</span>
                         <button 
                           onClick={() => handleDeleteSkill(index)} 
-                          className="ml-2 p-0.5 hover:bg-blue-200 hover:dark:bg-blue-800/50 rounded-full transition-colors duration-200 group"
+                          className="ml-2 p-0.5 hover:bg-primary-200 hover:dark:bg-primary-800/50 rounded-full transition-colors duration-200 group"
                           title="Remove skill"
+                          data-testid={`remove-skill-${index}`}
                         >
-                          <XMarkIcon className="w-3 h-3 text-blue-600 dark:text-blue-400 group-hover:text-red-600 dark:group-hover:text-red-400" />
+                          <XMarkIcon className="w-3 h-3 text-primary-600 dark:text-primary-400 group-hover:text-red-600 dark:group-hover:text-red-400" />
                         </button>
                       </div>
                     ))}
@@ -493,7 +511,8 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                           e.target.value = '';
                         }
                       }}
-                      className="w-full md:w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      className="w-full md:w-1/3 px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg shadow-sm bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                      data-testid="add-skill-input"
                     />
                   </div>
                 </div>
@@ -507,11 +526,17 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 className="btn-primary mb-4" 
                 onClick={handleCompanyInfo}
                 disabled={isGeneratingCompanyInfo}
+                data-testid="generate-company-info-button"
               >
-                {isGeneratingCompanyInfo ? 'Generating...' : 'Generate Company Info'}
+                {isGeneratingCompanyInfo ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Generating...
+                  </>
+                ) : 'Generate Company Info'}
               </button>
-              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                <pre className="whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100">
+              <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="company-info-content">
+                <pre className="whitespace-pre-wrap text-sm text-neutral-900 dark:text-neutral-100 font-mono">
                   {companyInfo || 'No company information available. Click the button to generate it.'}
                 </pre>
               </div>
@@ -525,8 +550,14 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 onClick={handleMatch}
                 disabled={isMatching || !hasDescription}
                 title={!hasDescription ? 'Please analyze the job first to get the description' : ''}
+                data-testid="run-cv-match-button"
               >
-                {isMatching ? 'Matching...' : 'Run CV Match'}
+                {isMatching ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Matching...
+                  </>
+                ) : 'Run CV Match'}
               </button>
               {matchResult && matchResult.score !== undefined && (() => {
                 const normalizeReasons = (val) => {
@@ -556,16 +587,16 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 };
                 const reasons = normalizeReasons(matchResult.reasons);
                 return (
-                  <div className={`glass-card p-4 border-l-4 ${
+                  <div className={`surface-card p-4 border-l-4 ${
                     matchResult.score > 0.5 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  }`}>
-                    <h6 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Match Result</h6>
-                    <p className="mb-3"><strong>Score:</strong> {(matchResult.score * 100).toFixed(0)}%</p>
+                  }`} data-testid="cv-match-result">
+                    <h6 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Match Result</h6>
+                    <p className="mb-3 text-neutral-800 dark:text-neutral-200"><strong className="text-neutral-900 dark:text-neutral-100">Score:</strong> {(matchResult.score * 100).toFixed(0)}%</p>
                     <div>
-                      <strong>Key Reasons:</strong>
+                      <strong className="text-neutral-900 dark:text-neutral-100">Key Reasons:</strong>
                       <ul className="list-disc list-inside mt-2 space-y-1">
                         {reasons.map((reason, index) => (
-                          <li key={index} className="text-sm">{reason}</li>
+                          <li key={index} className="text-sm text-neutral-700 dark:text-neutral-300">{reason}</li>
                         ))}
                       </ul>
                     </div>
@@ -573,8 +604,8 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 );
               })()}
               {job.analysis && (
-                <div className="mt-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                  <h6 className="font-semibold mb-3">Analysis</h6>
+                <div className="mt-4 bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="job-analysis-content">
+                  <h6 className="font-semibold mb-3 text-neutral-900 dark:text-neutral-100">Analysis</h6>
                   <div className="prose dark:prose-invert max-w-none text-sm">
                     <div dangerouslySetInnerHTML={{ __html: job.analysis.replace(/\n/g, '<br/>') }} />
                   </div>
@@ -590,31 +621,37 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 onClick={handleInterviewPrep}
                 disabled={isPrepping || !hasDescription}
                 title={!hasDescription ? 'Please analyze the job first to get the description' : ''}
+                data-testid="generate-interview-prep-button"
               >
-                {isPrepping ? 'Generating...' : 'Generate Interview Prep'}
+                {isPrepping ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Generating...
+                  </>
+                ) : 'Generate Interview Prep'}
               </button>
               {interviewPrep && (
                 <div className="space-y-4">
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                    <h6 className="font-semibold mb-2">Company Overview</h6>
-                    <p className="text-sm">{interviewPrep.company_overview}</p>
+                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="company-overview-section">
+                    <h6 className="font-semibold mb-2 text-neutral-900 dark:text-neutral-100">Company Overview</h6>
+                    <p className="text-sm text-neutral-700 dark:text-neutral-300">{interviewPrep.company_overview}</p>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                    <h6 className="font-semibold mb-2">Talking Points</h6>
+                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="talking-points-section">
+                    <h6 className="font-semibold mb-2 text-neutral-900 dark:text-neutral-100">Talking Points</h6>
                     <ul className="list-disc list-inside space-y-1">
-                      {interviewPrep.talking_points?.map((point, i) => <li key={i} className="text-sm">{point}</li>)}
+                      {interviewPrep.talking_points?.map((point, i) => <li key={i} className="text-sm text-neutral-700 dark:text-neutral-300">{point}</li>)}
                     </ul>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                    <h6 className="font-semibold mb-2">Technical Questions</h6>
+                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="technical-questions-section">
+                    <h6 className="font-semibold mb-2 text-neutral-900 dark:text-neutral-100">Technical Questions</h6>
                     <ul className="list-disc list-inside space-y-1">
-                      {interviewPrep.technical_questions?.map((q, i) => <li key={i} className="text-sm">{q}</li>)}
+                      {interviewPrep.technical_questions?.map((q, i) => <li key={i} className="text-sm text-neutral-700 dark:text-neutral-300">{q}</li>)}
                     </ul>
                   </div>
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border">
-                    <h6 className="font-semibold mb-2">Behavioral Questions</h6>
+                  <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="behavioral-questions-section">
+                    <h6 className="font-semibold mb-2 text-neutral-900 dark:text-neutral-100">Behavioral Questions</h6>
                     <ul className="list-disc list-inside space-y-1">
-                      {interviewPrep.behavioral_questions?.map((q, i) => <li key={i} className="text-sm">{q}</li>)}
+                      {interviewPrep.behavioral_questions?.map((q, i) => <li key={i} className="text-sm text-neutral-700 dark:text-neutral-300">{q}</li>)}
                     </ul>
                   </div>
                 </div>
@@ -629,14 +666,21 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 onClick={handleGenerateCoverLetter}
                 disabled={isGeneratingLetter || !hasDescription}
                 title={!hasDescription ? 'Please analyze the job first to get the description' : ''}
+                data-testid="generate-cover-letter-button"
               >
-                {isGeneratingLetter ? 'Generating...' : 'Generate Cover Letter'}
+                {isGeneratingLetter ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Generating...
+                  </>
+                ) : 'Generate Cover Letter'}
               </button>
               {coverLetter && (
                 <textarea
-                  className="w-full h-96 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 resize-none font-mono text-sm"
+                  className="w-full h-96 p-4 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 resize-none font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   value={coverLetter}
                   readOnly
+                  data-testid="cover-letter-textarea"
                 />
               )}
             </div>

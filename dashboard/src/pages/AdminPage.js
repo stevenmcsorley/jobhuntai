@@ -40,8 +40,8 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="h-full overflow-y-auto scrollbar-modern p-4">
+      <div className="max-w-screen-2xl mx-auto space-y-8">
         <h1 className="text-3xl font-bold text-gradient mb-4">Admin Dashboard</h1>
 
         {/* Create New User Section */}
