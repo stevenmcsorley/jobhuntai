@@ -335,7 +335,7 @@ app.post('/api/jobs/:id/generate-cover-letter', authenticateToken, async (req, r
         }
 
         // Fetch the full master profile
-        const profile = await require('./api/routes/profile').getFullProfile();
+        const profile = await require('./api/routes/profile').getFullProfile(req.user.id);
 
         const coverLetterText = await coverLetterGenerator.generateCoverLetter(job, profile);
 
@@ -406,7 +406,7 @@ app.post('/api/jobs/:id/tailor-cv', authenticateToken, async (req, res) => {
         }
 
         // Fetch the full master profile
-        const profile = await require('./api/routes/profile').getFullProfile();
+        const profile = await require('./api/routes/profile').getFullProfile(req.user.id);
 
         const tailoredCvText = await cvTailor.tailorCv(job, profile);
 

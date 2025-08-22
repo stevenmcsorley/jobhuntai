@@ -35,7 +35,7 @@ async function matchJob(knex, job, userId) {
   const testData = await knex('test_sessions')
     .select('skill', 'score', 'completed_at')
     .where({ user_id: userId })
-    .andWhere('score', '>', 60) // Only include passed tests
+    .whereNotNull('score') // Include all completed tests (passed and failed)
     .orderBy('completed_at', 'desc');
 
   const skillsWithTests = testData.map(t => ({
@@ -56,7 +56,9 @@ Your analysis must:
 1. Only include skills/experience that are explicitly mentioned in the CV
 2. Identify specific skill gaps (requirements mentioned in job but missing from CV)
 3. Be precise about matches vs mismatches
-4. Provide specific evidence from the CV for each match`
+4. Provide specific evidence from the CV for each match
+5. For test handling: Only exclude skills from suggested_tests if user scored >60% (passing), include skills that scored ≤60% as they need retaking
+6. For test matching: Use flexible skill matching - "GraphQL" tests relate to "GraphQL" requirements, "API Integration with GraphQL" relates to both "GraphQL" and "API integration" requirements`
         },
         {
           role: 'user',
@@ -80,8 +82,8 @@ Analyze this CV against the job requirements. Return ONLY valid JSON with these 
 - score: number 0-1 (percentage of requirements matched from CV)
 - matched_skills: array of strings (skills/experience from CV that match job requirements - quote specific evidence)
 - missing_skills: array of strings (required skills mentioned in job but not found in CV)
-- suggested_tests: array of strings (skills from missing_skills that could be tested in test hub)
-- completed_tests: array of objects with {skill, score, date} for relevant completed tests
+- suggested_tests: array of strings (skills from missing_skills that could be tested in test hub - exclude skills with test scores >60%, include skills with test scores ≤60% as they need retaking)
+- completed_tests: array of objects with {skill, score, date} for relevant completed tests (include all test attempts regardless of score, use flexible matching - e.g., "GraphQL" test matches "GraphQL" requirements, "API Integration with GraphQL" matches "GraphQL" or "API integration" requirements)
 - key_insights: array of strings (specific observations about fit based on CV content)
 
 Be extremely precise - only include skills actually mentioned in the CV, not inferred ones.`

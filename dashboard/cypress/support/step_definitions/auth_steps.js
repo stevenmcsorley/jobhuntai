@@ -10,17 +10,8 @@ Given("I am on the login page", () => {
 });
 
 Given("a test user exists", () => {
-  // Create a test user via API if it doesn't exist
-  cy.request({
-    method: 'POST',
-    url: '/api/auth/register',
-    body: {
-      email: 'cypress-test@example.com',
-      password: 'testpass123',
-      name: 'Cypress Test User'
-    },
-    failOnStatusCode: false
-  });
+  // Demo account already exists - no need to create
+  cy.log('Using existing demo account: jobhunter@localhost');
 });
 
 Given("I am logged in to the application", () => {
@@ -57,10 +48,10 @@ When("I click on {string} toggle", (buttonText) => {
 
 When("I fill in the registration form with valid data", () => {
   const timestamp = Date.now();
-  cy.get('input[name="name"]').type('Cypress Test User');
-  cy.get('input[name="email"]').type(`cypress-${timestamp}@example.com`);
-  cy.get('input[name="password"]').type('testpass123');
-  cy.get('input[name="confirmPassword"]').type('testpass123');
+  cy.get('input[name="name"]').type('Demo User');
+  cy.get('input[name="email"]').type(`demo-${timestamp}@localhost`);
+  cy.get('input[name="password"]').type('password123');
+  cy.get('input[name="confirmPassword"]').type('password123');
 });
 
 When("I fill in the registration form with invalid data", () => {
@@ -75,8 +66,8 @@ When("I submit the registration form", () => {
 });
 
 When("I fill in the login form with valid credentials", () => {
-  cy.get('input[name="email"]').type('cypress-test@example.com');
-  cy.get('input[name="password"]').type('testpass123');
+  cy.get('input[name="email"]').type('jobhunter@localhost');
+  cy.get('input[name="password"]').type('password123');
 });
 
 When("I fill in the login form with invalid credentials", () => {

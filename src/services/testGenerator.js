@@ -14,24 +14,86 @@ const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 const promptMatrix = {
   multiple_choice: `
-    You are a senior software engineer creating a technical quiz.
-    Generate a multiple-choice question to test a candidate's understanding of {topic} at a {difficulty} level.
-    Provide a clear question, four distinct options (one correct), and identify the correct answer.
-    Return ONLY valid JSON with keys: "question", "options" (an array of 4 strings), and "answer" (the correct string from the options).
+    You are an expert assessment creator with deep knowledge across all domains - from practical skills like goat herding and carpentry, to executive leadership, to technical expertise, to creative arts, to any profession or skill imaginable.
+
+    Your task: Generate a multiple-choice question to test someone's understanding of {topic} at a {difficulty} level.
+
+    **Skill Intelligence Guidelines:**
+    - Automatically detect the domain/field of {topic} (e.g., agriculture, technology, leadership, trades, arts, etc.)
+    - Adapt your question style to match that domain's real-world application
+    - For practical skills: Focus on hands-on scenarios, safety, tools, techniques
+    - For leadership/business: Focus on decisions, strategy, people management
+    - For technical skills: Focus on concepts, implementation, troubleshooting
+    - For creative fields: Focus on principles, techniques, critique, process
+    - For academic subjects: Focus on understanding, application, analysis
+
+    **Difficulty Adaptation:**
+    - Beginner: Basic concepts, common scenarios, fundamental knowledge
+    - Intermediate: Complex scenarios, nuanced understanding, practical application
+    - Advanced: Expert-level decisions, edge cases, mastery-level insights
+
+    Create a realistic, practical question that someone in this field would actually encounter.
+    Provide four distinct, plausible options where the wrong answers are realistic but incorrect.
+    
+    Return ONLY valid JSON with keys: "question", "options" (array of 4 strings), and "answer" (the correct string from options).
   `,
   short_answer: `
-    You are a technical interviewer.
-    Generate a short-answer question to test a candidate's conceptual understanding of {topic} at a {difficulty} level.
-    The question should require a concise, text-based answer.
-    Provide the question and a model correct answer.
+    You are an expert assessment creator with deep knowledge across all domains - from practical skills like goat herding and carpentry, to executive leadership, to technical expertise, to creative arts, to any profession or skill imaginable.
+
+    Your task: Generate a short-answer question to test someone's conceptual understanding of {topic} at a {difficulty} level.
+
+    **Skill Intelligence Guidelines:**
+    - Automatically detect the domain/field of {topic} (e.g., agriculture, technology, leadership, trades, arts, etc.)
+    - Adapt your question style to match that domain's real-world application
+    - For practical skills: Ask about methods, safety, troubleshooting, best practices
+    - For leadership/business: Ask about strategies, decision-making, team dynamics
+    - For technical skills: Ask about concepts, implementation approaches, problem-solving
+    - For creative fields: Ask about techniques, principles, artistic choices, process
+    - For academic subjects: Ask about understanding, analysis, application
+
+    **Difficulty Adaptation:**
+    - Beginner: Fundamental concepts, basic "how" and "why" questions
+    - Intermediate: Scenario-based questions requiring deeper understanding
+    - Advanced: Complex situations requiring expert judgment and nuanced understanding
+
+    Create a question that requires a thoughtful, concise answer (2-4 sentences).
+    The question should test understanding, not just memorization.
+    
     Return ONLY valid JSON with keys: "question" and "answer".
   `,
   code_challenge: `
-    You are a senior software engineer conducting a technical interview.
-    Generate a code challenge to test a candidate's practical application of {topic} at a {difficulty} level.
-    Provide a clear problem description as a single string.
-    Return ONLY valid JSON with keys: "question" (a string containing the full problem description) and "answer" (the optimal JavaScript function solution as a string).
-    The "answer" field must contain ONLY the raw code, with no markdown formatting, code fences (like \x60\x60\x60), or block quotes (like """).
+    You are an expert assessment creator specializing in practical, hands-on challenges across all domains.
+
+    Your task: Generate a practical challenge to test someone's applied skills in {topic} at a {difficulty} level.
+
+    **Domain Detection & Adaptation:**
+    - If {topic} is programming/technical: Create a coding problem with JavaScript solution
+    - If {topic} is leadership/business: Create a management scenario requiring strategic thinking
+    - If {topic} is practical/trades: Create a problem-solving scenario with step-by-step solution
+    - If {topic} is creative: Create a project brief with approach/methodology
+    - If {topic} is academic: Create an analysis or research challenge
+
+    **For Technical/Programming Topics:**
+    - Provide a clear problem description and optimal JavaScript solution
+    - Answer field contains ONLY raw code, no markdown or formatting
+
+    **For Non-Technical Topics:**
+    - Provide a realistic challenge or scenario as a single descriptive string
+    - Answer field contains a structured approach, methodology, or solution steps as a single string
+
+    **Critical JSON Format Requirements:**
+    - The response MUST be a simple flat JSON object with exactly 2 string fields
+    - "question": A single string containing the full challenge description
+    - "answer": A single string containing the solution approach (can include numbered steps or bullet points within the string)
+    - Do NOT create nested objects, arrays, or complex structures
+    - Do NOT include extra fields like "id", "title", "constraints", etc.
+
+    **Difficulty Scaling:**
+    - Beginner: Straightforward scenarios with clear solutions
+    - Intermediate: Multi-step problems requiring planning and execution
+    - Advanced: Complex challenges with multiple considerations and trade-offs
+
+    Return ONLY valid JSON with keys: "question" and "answer" (both must be simple strings).
   `
 };
 
@@ -113,6 +175,15 @@ async function evaluateAnswer(question, correctAnswer, userAnswer, type) {
     return behavioralTestGenerator.evaluateBehavioralAnswer(question, userAnswer, type);
   }
 
+  // Handle empty answers immediately
+  if (!userAnswer || userAnswer.trim().length === 0) {
+    console.log(`❌ Empty answer provided - marking as incorrect`);
+    return {
+      is_correct: false,
+      feedback: "No answer was provided. Please provide a response to demonstrate your understanding of the topic."
+    };
+  }
+
   console.log(`🤖 Evaluating answer for: "${question}"`);
   try {
     const chat = await groq.chat.completions.create({
@@ -120,20 +191,36 @@ async function evaluateAnswer(question, correctAnswer, userAnswer, type) {
       messages: [
         {
           role: 'system',
-          content: `You are a meticulous and fair technical interview evaluator. Your task is to evaluate a user's answer based on a provided question and a model answer.
+          content: `You are a universally knowledgeable and fair evaluator with expertise across ALL domains - from practical skills like goat herding and carpentry, to executive leadership, to technical expertise, to creative arts, to any profession or skill imaginable.
+
+            **Universal Evaluation Intelligence:**
+            - Automatically detect the domain/field from the question context
+            - Apply domain-appropriate evaluation criteria and standards
+            - For practical skills: Evaluate based on safety, efficiency, real-world applicability
+            - For leadership/business: Evaluate based on sound reasoning, people impact, strategic thinking
+            - For technical skills: Evaluate based on accuracy, best practices, problem-solving approach
+            - For creative fields: Evaluate based on understanding of principles, techniques, artistic merit
+            - For academic subjects: Evaluate based on conceptual understanding, accuracy, depth of analysis
 
             **Evaluation Steps:**
-            1.  **Analyze the Question:** First, carefully re-read the original **Question** and identify all its key constraints (e.g., timeframes, specific technologies, locations, required formats, etc.).
-            2.  **Analyze the User's Answer:** Compare the **User's Answer** against the constraints identified in the question.
-            3.  **Determine Correctness:** Decide if the User's Answer is correct, partially correct, or incorrect. It is correct if it satisfies all key constraints, even if the wording differs from the Model Answer.
-            4.  **Provide Feedback:** Write brief, constructive feedback explaining *why* the answer is correct or incorrect, referencing the specific constraints from the question.
-            5.  **Verify the Model Answer:** **Crucially, you must also validate the provided Model Answer against the original question's constraints.**
-            6.  **Construct Final Answer:** If the user is incorrect, provide a verified and accurate correct answer. If the provided Model Answer was also flawed, you MUST correct it to create a truly accurate response.
+            1.  **Check for Empty Answer:** If the user answer is empty, null, or contains only whitespace, immediately mark as incorrect (is_correct: false)
+            2.  **Detect Domain:** Identify what field/domain this question belongs to
+            3.  **Analyze Question:** Identify key requirements, constraints, and success criteria appropriate to that domain
+            4.  **Evaluate User Answer:** Compare against domain-appropriate standards and question requirements
+            5.  **Determine Correctness:** Consider if the answer demonstrates proper understanding and meets real-world standards for that field
+            6.  **Provide Domain-Appropriate Feedback:** Give constructive feedback using terminology and standards relevant to that field
+            7.  **Verify & Improve Model Answer:** Ensure the provided model answer meets professional standards for that domain
+
+            **Fairness Principles:**
+            - Accept multiple valid approaches when appropriate to the field
+            - Value practical wisdom alongside theoretical knowledge
+            - Consider cultural and regional variations in practices where relevant
+            - Recognize that expertise can be demonstrated in different ways across domains
 
             Return ONLY valid JSON with three keys:
-            - "is_correct": boolean
-            - "feedback": string (your constructive feedback)
-            - "correct_answer": string (the verified and truly correct answer, which will be shown to the user)
+            - "is_correct": boolean (MUST be false for empty, null, or whitespace-only answers)
+            - "feedback": string (domain-appropriate constructive feedback)
+            - "correct_answer": string (verified, professional-standard answer for that field)
             `
         },
         {

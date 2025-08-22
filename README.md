@@ -61,6 +61,7 @@ A modern, responsive web interface for controlling and monitoring the applicatio
     ```bash
     npx knex migrate:latest
     ```
+    This will create a demo account: `jobhunter@localhost` / `password123`
 
 ## Running the Application
 
@@ -71,51 +72,34 @@ docker-compose up --build
 -   Backend API: `http://localhost:5003`
 -   React Dashboard: `http://localhost:3000`
 
-## API Endpoints
+## Multi-User Authentication System
 
-### Jobs
--   `GET /api/jobs`: Retrieves all jobs.
--   `POST /api/jobs`: Manually adds a single job.
--   `PATCH /api/jobs/:id`: Updates a job's details (e.g., the description).
--   `POST /api/jobs/bulk`: Bulk imports jobs from a JSON array.
--   `POST /api/jobs/scrape?source=<source>`: Triggers a scrape for a single source.
--   `POST /api/jobs/:id/analyze`: Scrapes and stores the full description for a job.
--   `POST /api/jobs/:id/match`: Runs a CV match for a job.
--   `POST /api/jobs/:id/interview-prep`: Generates interview prep notes.
--   `POST /api/jobs/:id/generate-cover-letter`: Generates a cover letter.
--   `POST /api/jobs/:id/generate-company-info`: Generates a company summary.
--   `POST /api/jobs/:id/extract-skills`: Extracts skills from a job description.
+JobHunt AI now supports multiple users with secure authentication:
 
-### Applications
--   `GET /api/applications`: Retrieves all applications.
--   `POST /api/applications/:id/apply`: Triggers an application for an opportunity.
--   `PATCH /api/applications/:id`: Updates the status of an application.
--   `DELETE /api/applications/:id`: Deletes an application and its associated job.
+- **Registration & Login**: Create accounts and secure login with JWT tokens
+- **Data Isolation**: All user data is completely isolated and private
+- **Session Management**: Persistent login sessions with token refresh
+- **Demo Account**: `jobhunter@localhost` / `password123` for testing
 
-### Interviews
--   `GET /api/interviews`: Retrieves all interviews.
--   `POST /api/applications/:id/interviews`: Adds an interview for an application.
+## Universal AI Testing System
 
-### Test & Guidance Hubs
--   `POST /api/tests/start`: Starts a new test session.
--   `POST /api/tests/submit-answer`: Submits an answer for evaluation.
--   `POST /api/tests/sessions/:id/reset-incorrect`: Resets the incorrect answers in a session for a retake.
--   `GET /api/tests/sessions/:id/continue`: Resumes an in-progress test session.
--   `DELETE /api/tests/sessions/:id`: Deletes a test session and all its results.
--   `GET /api/tests/history`: Retrieves all past test sessions.
--   `GET /api/tests/sessions/:id`: Retrieves the full results for a single test session.
--   `GET /api/tests/prompts`: Retrieves the AI prompt matrix.
--   `GET /api/guidance/summary`: Gets a summary of the user's weakest topics.
--   `GET /api/guidance/:topic`: Gets a personalized learning plan for a topic.
+The Test Hub has been enhanced to support **any skill domain**:
 
-### Other
--   `GET /api/matches`: Retrieves all match results.
--   `GET /api/stats`: Retrieves dashboard and stats page data.
--   `GET /api/cv`: Retrieves the content of `cv.txt`.
--   `POST /api/cv`: Updates the content of `cv.txt`.
--   `GET /api/preferences`: Retrieves user preferences.
--   `POST /api/preferences`: Updates user preferences.
--   `GET /api/market-fit`: Analyzes skill frequency across all jobs.
--   `POST /api/hunt`: Triggers the proactive job hunter.
--   `POST /api/run`: Triggers a full scrape, match, and apply cycle.
+- **Universal Intelligence**: From "goat herding to CTO" - tests any skill or profession
+- **Domain-Adaptive**: Automatically detects skill domains and generates appropriate questions
+- **Smart UI Components**: Shows code editors for programming skills, text inputs for others
+- **Enhanced CV Matching**: Test results are integrated into CV matching with intelligent suggestions
+
+## API Documentation
+
+For complete API documentation including all endpoints, authentication, and examples, see [API_ENDPOINTS.md](API_ENDPOINTS.md).
+
+### Key Endpoint Categories:
+- **Authentication**: User registration, login, password management
+- **Jobs & Applications**: Job management, application tracking, interview scheduling
+- **AI Features**: CV matching, cover letter generation, interview prep, company analysis
+- **Test Hub**: Universal skill testing across all domains
+- **Guidance Hub**: AI-powered personalized learning plans
+- **Master Profile**: Comprehensive profile management with CV parsing
+- **Analytics**: Market fit analysis, skills demand insights
 

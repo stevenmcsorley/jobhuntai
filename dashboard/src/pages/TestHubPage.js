@@ -13,7 +13,7 @@ const frameworkDescriptions = {
 
 const TestConfiguration = ({ onStartTest, topSkills }) => {
   const [skill, setSkill] = useState(topSkills[0] || 'React');
-  const [difficulty, setDifficulty] = useState('Mid-Level');
+  const [difficulty, setDifficulty] = useState('Intermediate');
   const [type, setType] = useState('short_answer');
   const [customSkill, setCustomSkill] = useState('');
 
@@ -31,7 +31,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
     <div className="surface-card p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-neutral-900 dark:text-gray-100 mb-2">Start a New Test</h2>
-        <p className="text-neutral-600 dark:text-gray-300">Select a topic, difficulty, and test type to begin.</p>
+        <p className="text-neutral-600 dark:text-gray-300">Test your knowledge in any skill - from practical trades and leadership to technical expertise and creative arts.</p>
       </div>
         
         <div className="space-y-6">
@@ -44,7 +44,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
             >
               <option value="short_answer">Short Answer</option>
               <option value="multiple_choice">Multiple Choice</option>
-              <option value="code_challenge">Code Challenge</option>
+              <option value="code_challenge">Practical Challenge</option>
               <option value="behavioral_star">Behavioral (STAR)</option>
               <option value="behavioral_soar">Behavioral (SOAR)</option>
             </select>
@@ -73,14 +73,17 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Or Enter a Custom Topic</label>
+                <label className="block text-sm font-medium text-neutral-700 dark:text-gray-200 mb-2">Or Enter Any Custom Topic</label>
                 <input 
                   type="text" 
                   className="input-modern" 
-                  placeholder="e.g., JavaScript Higher-Order Functions"
+                  placeholder="e.g., Goat Herding, Leadership, Carpentry, Cooking, Photography..."
                   value={customSkill}
                   onChange={e => setCustomSkill(e.target.value)}
                 />
+                <p className="text-xs text-neutral-500 dark:text-gray-400 mt-1">
+                  Test any skill from practical trades to executive leadership to creative arts!
+                </p>
               </div>
               
               <div className="md:col-span-2">
@@ -90,9 +93,9 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
                   value={difficulty} 
                   onChange={e => setDifficulty(e.target.value)}
                 >
-                  <option>Junior</option>
-                  <option>Mid-Level</option>
-                  <option>Senior</option>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
                 </select>
               </div>
             </div>
@@ -676,16 +679,46 @@ const TestHubPage = () => {
           );
         }
         
-        if (session.type === 'code_challenge') {
-          return (
-            <CodeChallengeTestSession
-              session={session}
-              question={currentQuestion}
-              onAnswerSubmit={handleAnswerSubmit}
-              questionNumber={questionCount.current}
-              totalQuestions={questionCount.total}
-            />
+        // Helper function to detect if a skill is programming-related
+        const isProgrammingSkill = (skill) => {
+          const programmingKeywords = [
+            'javascript', 'python', 'java', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift',
+            'kotlin', 'typescript', 'react', 'vue', 'angular', 'node', 'express', 'django',
+            'flask', 'spring', 'laravel', 'rails', 'programming', 'coding', 'development',
+            'software', 'algorithm', 'data structure', 'frontend', 'backend', 'fullstack',
+            'web development', 'mobile development', 'api', 'database', 'sql', 'nosql',
+            'html', 'css', 'git', 'docker', 'kubernetes', 'aws', 'azure', 'devops'
+          ];
+          
+          return programmingKeywords.some(keyword => 
+            skill.toLowerCase().includes(keyword.toLowerCase())
           );
+        };
+
+        if (session.type === 'code_challenge') {
+          // Show code editor only for programming skills, otherwise show regular text challenge
+          if (isProgrammingSkill(session.skill)) {
+            return (
+              <CodeChallengeTestSession
+                session={session}
+                question={currentQuestion}
+                onAnswerSubmit={handleAnswerSubmit}
+                questionNumber={questionCount.current}
+                totalQuestions={questionCount.total}
+              />
+            );
+          } else {
+            // For non-programming practical challenges, use regular text input
+            return (
+              <ActiveTestSession
+                session={session}
+                question={currentQuestion}
+                onAnswerSubmit={handleAnswerSubmit}
+                questionNumber={questionCount.current}
+                totalQuestions={questionCount.total}
+              />
+            );
+          }
         }
         
         return (

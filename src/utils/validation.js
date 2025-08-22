@@ -2,7 +2,7 @@
  * Validation utilities for the job hunt AI application
  */
 
-const VALID_DIFFICULTIES = ['Junior', 'Mid-Level', 'Senior'];
+const VALID_DIFFICULTIES = ['Beginner', 'Intermediate', 'Advanced'];
 const VALID_TEST_TYPES = ['multiple_choice', 'short_answer', 'code_challenge', 'behavioral_star', 'behavioral_soar'];
 const MAX_SKILL_LENGTH = 100;
 const MAX_ANSWER_LENGTH = 5000;

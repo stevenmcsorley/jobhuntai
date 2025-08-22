@@ -1,7 +1,7 @@
 // Custom commands for JobHunt AI application
 
 // Authentication commands
-Cypress.Commands.add('login', (username, password) => {
+Cypress.Commands.add('login', (username = 'jobhunter@localhost', password = 'password123') => {
   cy.session([username, password], () => {
     cy.visit('/login');
     cy.get('[data-cy="username"]').type(username);
