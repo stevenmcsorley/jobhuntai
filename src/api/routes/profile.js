@@ -1,16 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const knex = require('knex')(require('../../../knexfile').development);
+const { authenticateToken } = require('../../middleware/auth');
+
+// Use authentication middleware for all profile routes
+router.use(authenticateToken);
 
 // --- Helper to fetch full profile ---
-const getFullProfile = async () => {
-  const profile = await knex('profiles').first();
-  const skills = await knex('skills').select('*');
-  const work_experiences = await knex('work_experiences').select('*');
+const getFullProfile = async (userId) => {
+  const profile = await knex('profiles').where({ user_id: userId }).first();
+  const skills = await knex('skills').where({ user_id: userId }).select('*');
+  const work_experiences = await knex('work_experiences').where({ user_id: userId }).select('*');
   const experience_highlights = await knex('experience_highlights').select('*');
-  const projects = await knex('projects').select('*');
+  const projects = await knex('projects').where({ user_id: userId }).select('*');
   const project_highlights = await knex('project_highlights').select('*');
-  const education = await knex('education').select('*');
+  const education = await knex('education').where({ user_id: userId }).select('*');
 
   const experiencesWithHighlights = work_experiences.map(exp => ({
     ...exp,
@@ -36,7 +40,7 @@ const { seedProfileFromCv } = require('../../services/profileSeeder');
 // GET /api/profile - Fetch all master profile data
 router.get('/', async (req, res) => {
   try {
-    const fullProfile = await getFullProfile();
+    const fullProfile = await getFullProfile(req.user.id);
     res.json(fullProfile);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch profile data.', details: err.message });
@@ -46,37 +50,50 @@ router.get('/', async (req, res) => {
 // POST /api/profile/seed - Parse cv.txt and populate the profile tables
 router.post('/seed', async (req, res) => {
   try {
-    const structuredProfile = await seedProfileFromCv();
+    console.log('🌱 Starting profile seed for user:', req.user.id);
+    const structuredProfile = await seedProfileFromCv(req.user.id);
+    console.log('✅ CV parsed, structured profile:', JSON.stringify(structuredProfile, null, 2));
 
     // Use a transaction to ensure the entire operation succeeds or fails together
     await knex.transaction(async trx => {
-      // Clear all existing profile data
-      await trx('education').del();
-      await trx('project_highlights').del();
-      await trx('projects').del();
-      await trx('experience_highlights').del();
-      await trx('work_experiences').del();
-      await trx('skills').del();
-      await trx('profiles').del();
+      console.log('🗑️ Clearing existing profile data for user:', req.user.id);
+      
+      // Clear all existing profile data for this user
+      await trx('education').where({ user_id: req.user.id }).del();
+      await trx('project_highlights').whereIn('project_id', trx('projects').where({ user_id: req.user.id }).select('id')).del();
+      await trx('projects').where({ user_id: req.user.id }).del();
+      await trx('experience_highlights').whereIn('experience_id', trx('work_experiences').where({ user_id: req.user.id }).select('id')).del();
+      await trx('work_experiences').where({ user_id: req.user.id }).del();
+      await trx('skills').where({ user_id: req.user.id }).del();
+      await trx('profiles').where({ user_id: req.user.id }).del();
 
-      // Insert new data
+      console.log('📝 Inserting new profile data...');
+      // Insert new data with user_id
       const { profile, skills, work_experiences, projects, education } = structuredProfile;
       
       if (profile) {
-        await trx('profiles').insert(profile);
+        console.log('Inserting profile:', profile);
+        await trx('profiles').insert({ ...profile, user_id: req.user.id });
       }
       if (skills && skills.length > 0) {
-        await trx('skills').insert(skills);
+        console.log('Inserting skills:', skills);
+        const skillsWithUserId = skills.map(skill => ({ ...skill, user_id: req.user.id }));
+        await trx('skills').insert(skillsWithUserId);
       }
       if (education && education.length > 0) {
-        await trx('education').insert(education);
+        console.log('Inserting education:', education);
+        const educationWithUserId = education.map(edu => ({ ...edu, user_id: req.user.id }));
+        await trx('education').insert(educationWithUserId);
       }
 
       if (work_experiences && work_experiences.length > 0) {
+        console.log('Inserting work experiences:', work_experiences);
         for (const exp of work_experiences) {
           const { highlights, ...expData } = exp;
-          const [newExp] = await trx('work_experiences').insert(expData).returning('*');
+          console.log('Inserting work experience:', expData);
+          const [newExp] = await trx('work_experiences').insert({ ...expData, user_id: req.user.id }).returning('*');
           if (highlights && highlights.length > 0) {
+            console.log('Inserting experience highlights for exp ID:', newExp.id);
             const highlightsToInsert = highlights.map(h => ({
               experience_id: newExp.id,
               highlight_text: h.highlight_text
@@ -87,10 +104,13 @@ router.post('/seed', async (req, res) => {
       }
 
       if (projects && projects.length > 0) {
+        console.log('Inserting projects:', projects);
         for (const proj of projects) {
           const { highlights, ...projData } = proj;
-          const [newProj] = await trx('projects').insert(projData).returning('*');
+          console.log('Inserting project:', projData);
+          const [newProj] = await trx('projects').insert({ ...projData, user_id: req.user.id }).returning('*');
           if (highlights && highlights.length > 0) {
+            console.log('Inserting project highlights for project ID:', newProj.id);
             const highlightsToInsert = highlights.map(h => ({
               project_id: newProj.id,
               highlight_text: h.highlight_text
@@ -99,11 +119,16 @@ router.post('/seed', async (req, res) => {
           }
         }
       }
+      
+      console.log('✅ All profile data inserted successfully');
     });
 
+    console.log('🎉 Profile seeded successfully for user:', req.user.id);
     res.status(201).json({ message: 'Profile seeded successfully!' });
 
   } catch (err) {
+    console.error('❌ Error seeding profile:', err);
+    console.error('Error stack:', err.stack);
     res.status(500).json({ error: 'Failed to seed profile from CV.', details: err.message });
   }
 });
@@ -112,13 +137,13 @@ router.post('/seed', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { id, ...profileData } = req.body;
-    const existingProfile = await knex('profiles').first();
+    const existingProfile = await knex('profiles').where({ user_id: req.user.id }).first();
     if (existingProfile) {
-      await knex('profiles').where({ id: existingProfile.id }).update(profileData);
+      await knex('profiles').where({ id: existingProfile.id, user_id: req.user.id }).update(profileData);
     } else {
-      await knex('profiles').insert(profileData);
+      await knex('profiles').insert({ ...profileData, user_id: req.user.id });
     }
-    res.json(await getFullProfile());
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to save profile.', details: err.message });
   }
@@ -127,8 +152,8 @@ router.post('/', async (req, res) => {
 // --- Skills Routes ---
 router.post('/skills', async (req, res) => {
   try {
-    await knex('skills').insert(req.body);
-    res.status(201).json(await getFullProfile());
+    await knex('skills').insert({ ...req.body, user_id: req.user.id });
+    res.status(201).json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to add skill.', details: err.message });
   }
@@ -136,8 +161,8 @@ router.post('/skills', async (req, res) => {
 
 router.delete('/skills/:id', async (req, res) => {
   try {
-    await knex('skills').where({ id: req.params.id }).del();
-    res.json(await getFullProfile());
+    await knex('skills').where({ id: req.params.id, user_id: req.user.id }).del();
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete skill.', details: err.message });
   }
@@ -148,7 +173,7 @@ router.post('/work-experiences', async (req, res) => {
   try {
     const { highlights, ...expData } = req.body;
     await knex.transaction(async trx => {
-      const [newExp] = await trx('work_experiences').insert(expData).returning('*');
+      const [newExp] = await trx('work_experiences').insert({ ...expData, user_id: req.user.id }).returning('*');
       if (highlights && highlights.length > 0) {
         const highlightsToInsert = highlights.map(h => ({
           experience_id: newExp.id,
@@ -157,7 +182,7 @@ router.post('/work-experiences', async (req, res) => {
         await trx('experience_highlights').insert(highlightsToInsert);
       }
     });
-    res.status(201).json(await getFullProfile());
+    res.status(201).json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to add work experience.', details: err.message });
   }
@@ -167,7 +192,7 @@ router.put('/work-experiences/:id', async (req, res) => {
   try {
     const { highlights, ...expData } = req.body;
     await knex.transaction(async trx => {
-      await trx('work_experiences').where({ id: req.params.id }).update(expData);
+      await trx('work_experiences').where({ id: req.params.id, user_id: req.user.id }).update(expData);
       await trx('experience_highlights').where({ experience_id: req.params.id }).del();
       if (highlights && highlights.length > 0) {
         const highlightsToInsert = highlights.map(h => ({
@@ -177,7 +202,7 @@ router.put('/work-experiences/:id', async (req, res) => {
         await trx('experience_highlights').insert(highlightsToInsert);
       }
     });
-    res.json(await getFullProfile());
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to update work experience.', details: err.message });
   }
@@ -185,8 +210,8 @@ router.put('/work-experiences/:id', async (req, res) => {
 
 router.delete('/work-experiences/:id', async (req, res) => {
   try {
-    await knex('work_experiences').where({ id: req.params.id }).del();
-    res.json(await getFullProfile());
+    await knex('work_experiences').where({ id: req.params.id, user_id: req.user.id }).del();
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete work experience.', details: err.message });
   }
@@ -197,7 +222,7 @@ router.post('/projects', async (req, res) => {
   try {
     const { highlights, ...projectData } = req.body;
     await knex.transaction(async trx => {
-      const [newProject] = await trx('projects').insert(projectData).returning('*');
+      const [newProject] = await trx('projects').insert({ ...projectData, user_id: req.user.id }).returning('*');
       if (highlights && highlights.length > 0) {
         const highlightsToInsert = highlights.map(h => ({
           project_id: newProject.id,
@@ -206,7 +231,7 @@ router.post('/projects', async (req, res) => {
         await trx('project_highlights').insert(highlightsToInsert);
       }
     });
-    res.status(201).json(await getFullProfile());
+    res.status(201).json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to add project.', details: err.message });
   }
@@ -216,7 +241,7 @@ router.put('/projects/:id', async (req, res) => {
   try {
     const { highlights, ...projectData } = req.body;
     await knex.transaction(async trx => {
-      await trx('projects').where({ id: req.params.id }).update(projectData);
+      await trx('projects').where({ id: req.params.id, user_id: req.user.id }).update(projectData);
       await trx('project_highlights').where({ project_id: req.params.id }).del();
       if (highlights && highlights.length > 0) {
         const highlightsToInsert = highlights.map(h => ({
@@ -226,7 +251,7 @@ router.put('/projects/:id', async (req, res) => {
         await trx('project_highlights').insert(highlightsToInsert);
       }
     });
-    res.json(await getFullProfile());
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to update project.', details: err.message });
   }
@@ -234,8 +259,8 @@ router.put('/projects/:id', async (req, res) => {
 
 router.delete('/projects/:id', async (req, res) => {
   try {
-    await knex('projects').where({ id: req.params.id }).del();
-    res.json(await getFullProfile());
+    await knex('projects').where({ id: req.params.id, user_id: req.user.id }).del();
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete project.', details: err.message });
   }
@@ -244,8 +269,8 @@ router.delete('/projects/:id', async (req, res) => {
 // --- Education Routes ---
 router.post('/education', async (req, res) => {
   try {
-    await knex('education').insert(req.body);
-    res.status(201).json(await getFullProfile());
+    await knex('education').insert({ ...req.body, user_id: req.user.id });
+    res.status(201).json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to add education entry.', details: err.message });
   }
@@ -253,8 +278,8 @@ router.post('/education', async (req, res) => {
 
 router.put('/education/:id', async (req, res) => {
   try {
-    await knex('education').where({ id: req.params.id }).update(req.body);
-    res.json(await getFullProfile());
+    await knex('education').where({ id: req.params.id, user_id: req.user.id }).update(req.body);
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to update education entry.', details: err.message });
   }
@@ -262,8 +287,8 @@ router.put('/education/:id', async (req, res) => {
 
 router.delete('/education/:id', async (req, res) => {
   try {
-    await knex('education').where({ id: req.params.id }).del();
-    res.json(await getFullProfile());
+    await knex('education').where({ id: req.params.id, user_id: req.user.id }).del();
+    res.json(await getFullProfile(req.user.id));
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete education entry.', details: err.message });
   }
@@ -272,7 +297,7 @@ router.delete('/education/:id', async (req, res) => {
 // GET /api/profile/download - Download the master profile as a text file
 router.get('/download', async (req, res) => {
   try {
-    const { profile, skills, work_experiences, projects, education } = await getFullProfile();
+    const { profile, skills, work_experiences, projects, education } = await getFullProfile(req.user.id);
 
     let content = `--- MASTER PROFILE ---
 

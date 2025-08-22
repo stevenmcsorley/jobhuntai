@@ -33,14 +33,18 @@ const MasterProfilePage = () => {
   };
 
   const handleSeedProfile = async () => {
-    if (window.confirm('Are you sure you want to automatically populate your profile from cv.txt? This will overwrite any existing data.')) {
+    const confirmMessage = isProfileEmpty 
+      ? 'Are you sure you want to automatically populate your profile from your CV? This will create your initial profile data.'
+      : 'Are you sure you want to re-import from your CV? This will overwrite your existing profile data with the latest CV content.';
+    
+    if (window.confirm(confirmMessage)) {
       toast.info('Parsing your CV with AI... This may take a moment.');
       try {
         await axios.post('/api/profile/seed');
-        toast.success('Profile successfully seeded from your CV!');
+        toast.success('Profile successfully updated from your CV!');
         fetchProfile(); // Refresh the data
       } catch (error) {
-        toast.error('Failed to seed profile from CV.');
+        toast.error('Failed to update profile from CV.');
         console.error('Error seeding profile:', error);
       }
     }
@@ -93,16 +97,14 @@ const MasterProfilePage = () => {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              {isProfileEmpty && (
-                <button 
-                  onClick={handleSeedProfile} 
-                  className="btn-success flex items-center space-x-2"
-                  data-testid="import-cv-button"
-                >
-                  <SparklesIcon className="w-5 h-5" />
-                  <span>Import from cv.txt</span>
-                </button>
-              )}
+              <button 
+                onClick={handleSeedProfile} 
+                className={`${isProfileEmpty ? 'btn-success' : 'btn-primary'} flex items-center space-x-2`}
+                data-testid="import-cv-button"
+              >
+                <SparklesIcon className="w-5 h-5" />
+                <span>{isProfileEmpty ? 'Import from CV' : 'Re-import from CV'}</span>
+              </button>
                <button 
                 onClick={handleDownloadProfile} 
                 className="btn-secondary flex items-center space-x-2"

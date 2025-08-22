@@ -6,6 +6,7 @@ import { safeJsonParse } from './utils/jsonUtils';
 import Sidebar from './components/Sidebar';
 import CommandPalette from './components/CommandPalette';
 import FloatingActionButton from './components/FloatingActionButton';
+import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TestHubPage from './pages/TestHubPage';
 import StatsPage from './pages/StatsPage';
@@ -19,8 +20,9 @@ import GuidancePage from './pages/GuidancePage';
 import MasterProfilePage from './pages/MasterProfilePage';
 import JobAnalysisPage from './pages/JobAnalysisPage';
 import { ThemeContext } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-function App() {
+function AppContent() {
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -28,6 +30,7 @@ function App() {
   const [interviews, setInterviews] = useState([]);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const { theme } = useContext(ThemeContext);
+  const { isAuthenticated, isLoading, login, logout } = useAuth();
 
   // Command palette keyboard shortcut
   useEffect(() => {
@@ -43,6 +46,8 @@ function App() {
   }, []);
 
   const fetchData = async () => {
+    if (!isAuthenticated) return;
+    
     try {
       const [jobsRes, appsRes, matchesRes, statsRes, interviewsRes] = await Promise.all([
         axios.get('/api/jobs'),
@@ -58,13 +63,21 @@ function App() {
       setInterviews(interviewsRes.data);
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error('Failed to fetch data.');
+      if (error.response?.status === 401) {
+        // Token expired or invalid
+        logout();
+        toast.error('Session expired. Please log in again.');
+      } else {
+        toast.error('Failed to fetch data.');
+      }
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
 
   const handleApplicationUpdate = (updatedApp) => {
     setApplications(prevApps =>
@@ -117,13 +130,30 @@ function App() {
     return combined;
   });
 
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600 dark:text-neutral-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={login} />;
+  }
+
   // Calculate opportunities count for sidebar badge
   const opportunitiesCount = applications.filter(app => app.status === 'opportunity').length;
 
   return (
     <Router>
       <div className="flex min-h-screen bg-neutral-50 dark:bg-slate-900 scrollbar-modern">
-        <Sidebar opportunitiesCount={opportunitiesCount} />
+        <Sidebar opportunitiesCount={opportunitiesCount} onLogout={logout} />
         <main className="flex-1 overflow-hidden bg-dot-pattern">
           <Routes>
             <Route path="/" element={<DashboardPage applications={combinedApps} allJobs={jobs} fetchData={fetchData} onJobUpdate={handleJobUpdate} onMatchComplete={handleMatchResult} />} />
@@ -133,7 +163,7 @@ function App() {
             <Route path="/test" element={<TestHubPage />} />
             <Route path="/stats" element={<StatsPage stats={stats} />} />
             <Route path="/cv-editor" element={<CVEditorPage />} />
-            <Route path="/interviews" element={<InterviewsPage interviews={interviews} />} />
+            <Route path="/interviews" element={<InterviewsPage interviews={interviews} onRefresh={fetchData} />} />
             <Route path="/market-fit" element={<MarketFitPage />} />
             <Route path="/bulk-add" element={<BulkAddPage fetchData={fetchData} />} />
             <Route path="/guidance" element={<GuidancePage />} />
@@ -149,6 +179,14 @@ function App() {
         />
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

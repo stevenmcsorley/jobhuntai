@@ -1,13 +1,18 @@
-const fs = require('fs').promises;
-const path = require('path');
 const Groq = require('groq-sdk');
+const knex = require('knex')(require('../../knexfile').development);
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-async function seedProfileFromCv() {
-  console.log('🌱 Reading cv.txt to seed master profile...');
-  const cvPath = path.resolve(__dirname, '../../cv.txt');
-  const cvText = await fs.readFile(cvPath, 'utf-8');
+async function seedProfileFromCv(userId) {
+  console.log('🌱 Reading CV from database to seed master profile for user:', userId);
+  
+  // Get CV content from database for the specific user
+  const cvRecord = await knex('cvs').where({ user_id: userId }).first();
+  if (!cvRecord || !cvRecord.content) {
+    throw new Error('No CV content found for user. Please save your CV first.');
+  }
+  
+  const cvText = cvRecord.content;
 
   const prompt = `
     You are an expert data extraction and structuring AI. Your task is to parse the following CV text and convert it into a structured JSON object.

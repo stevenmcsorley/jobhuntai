@@ -1,9 +1,56 @@
-import React from 'react';
-import { CalendarDaysIcon, ClockIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { CalendarDaysIcon, ClockIcon, BuildingOfficeIcon, ChatBubbleLeftRightIcon, CheckCircleIcon, PencilIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline';
+import EditInterviewModal from '../components/EditInterviewModal';
 
-const InterviewsPage = ({ interviews }) => {
+const InterviewsPage = ({ interviews, onRefresh }) => {
+  const [editingInterview, setEditingInterview] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(null);
+  
   const upcomingInterviews = interviews.filter(i => new Date(i.interview_date) >= new Date());
   const pastInterviews = interviews.filter(i => new Date(i.interview_date) < new Date());
+
+  const handleEditInterview = async (interview, updatedData) => {
+    try {
+      await axios.patch(`/api/interviews/${interview.id}`, updatedData);
+      toast.success('Interview updated successfully!');
+      setEditingInterview(null);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      toast.error('Failed to update interview.');
+      console.error('Error updating interview:', error);
+    }
+  };
+
+  const handleDeleteInterview = async (interview) => {
+    if (!window.confirm('Are you sure you want to delete this interview?')) return;
+    
+    try {
+      setIsDeleting(interview.id);
+      await axios.delete(`/api/interviews/${interview.id}`);
+      toast.success('Interview deleted successfully!');
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      toast.error('Failed to delete interview.');
+      console.error('Error deleting interview:', error);
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const handleArchiveInterview = async (interview) => {
+    if (!window.confirm('Archive this completed interview? This will remove it from your active interviews.')) return;
+    
+    try {
+      await axios.patch(`/api/interviews/${interview.id}`, { archived: true });
+      toast.success('Interview archived successfully!');
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      toast.error('Failed to archive interview.');
+      console.error('Error archiving interview:', error);
+    }
+  };
 
   const renderInterviewList = (title, list, isUpcoming = false) => (
     <div className="surface-card animate-fade-in">
@@ -27,9 +74,37 @@ const InterviewsPage = ({ interviews }) => {
               <div key={interview.id} className="surface-card-soft p-4 hover:scale-[1.02] transition-all duration-200">
                 <div className="flex items-start justify-between mb-3">
                   <h3 className="text-lg font-semibold text-neutral-900 dark:text-white">{interview.job_title}</h3>
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
-                    <CalendarDaysIcon className="w-4 h-4" />
-                    <span>{new Date(interview.interview_date).toLocaleString()}</span>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center space-x-1">
+                      <CalendarDaysIcon className="w-4 h-4" />
+                      <span>{new Date(interview.interview_date).toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => setEditingInterview(interview)}
+                        className="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                        title="Edit Interview"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                      {!isUpcoming && (
+                        <button
+                          onClick={() => handleArchiveInterview(interview)}
+                          className="p-1.5 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20 rounded transition-colors"
+                          title="Archive Interview"
+                        >
+                          <ArchiveBoxIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteInterview(interview)}
+                        disabled={isDeleting === interview.id}
+                        className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50"
+                        title="Delete Interview"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -93,6 +168,15 @@ const InterviewsPage = ({ interviews }) => {
         {renderInterviewList('Upcoming Interviews', upcomingInterviews, true)}
         {renderInterviewList('Past Interviews', pastInterviews, false)}
       </div>
+
+      {/* Edit Interview Modal */}
+      {editingInterview && (
+        <EditInterviewModal
+          interview={editingInterview}
+          onSave={handleEditInterview}
+          onClose={() => setEditingInterview(null)}
+        />
+      )}
     </div>
   );
 };

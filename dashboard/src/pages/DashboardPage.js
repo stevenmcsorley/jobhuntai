@@ -42,7 +42,6 @@ function timeAgo(dateString) {
 }
 
 function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchComplete }) {
-  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progressMessage, setProgressMessage] = useState('Running...');
   const [showArchived, setShowArchived] = useState(false);
@@ -199,10 +198,7 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
   };
 
   const filteredApplications = applications.filter(app =>
-    (!['archived', 'rejected'].includes(app.status) || showArchived) &&
-    Object.values(app).some(val =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    (!['archived', 'rejected'].includes(app.status) || showArchived)
   );
 
   const appliedJobs = filteredApplications.filter(app => app.status === 'applied');
@@ -401,14 +397,7 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <input
-            type="text"
-            className="search-input flex-1 max-w-md"
-            placeholder="Search for jobs by title, company, or location…"
-            onChange={e => setSearchTerm(e.target.value)}
-            data-testid="dashboard-search-input"
-          />
+        <div className="flex flex-col md:flex-row justify-end items-center gap-4 mb-6">
           <div className="flex items-center space-x-3">
             <input
               className="w-4 h-4 text-blue-600 dark:text-blue-400 rounded focus:ring-blue-500 dark:focus:ring-blue-400"

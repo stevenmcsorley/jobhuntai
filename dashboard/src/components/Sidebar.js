@@ -4,10 +4,10 @@ import ThemeToggler from './ThemeToggler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBriefcase, faStar, faThLarge, faCalendarCheck, faFileAlt, 
-  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut
+  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut, faSignOutAlt
 } from '@fortawesome/free-solid-svg-icons';
 
-const Sidebar = ({ opportunitiesCount = 0 }) => {
+const Sidebar = ({ opportunitiesCount = 0, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -128,6 +128,23 @@ const Sidebar = ({ opportunitiesCount = 0 }) => {
         <div className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
           <ThemeToggler />
         </div>
+        
+        {onLogout && (
+          <button 
+            onClick={onLogout}
+            className="group w-full p-3 text-slate-400 hover:text-red-400 hover:bg-gradient-to-r hover:from-red-600/20 hover:to-red-500/20 rounded-xl transition-all duration-300 flex items-center justify-center relative overflow-hidden"
+            title="Logout"
+          >
+            <FontAwesomeIcon 
+              icon={faSignOutAlt} 
+              className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" 
+            />
+            {!isCollapsed && (
+              <span className="ml-2 text-xs font-medium">Logout</span>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/0 via-red-600/10 to-red-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </button>
+        )}
         
         <button 
           onClick={toggleSidebar}

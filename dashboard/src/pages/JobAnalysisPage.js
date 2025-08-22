@@ -560,46 +560,136 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                 ) : 'Run CV Match'}
               </button>
               {matchResult && matchResult.score !== undefined && (() => {
-                const normalizeReasons = (val) => {
+                const normalizeArray = (val) => {
                   if (!val) return [];
                   if (Array.isArray(val)) return val;
                   if (typeof val === 'string') {
-                    // Handle plain text list, markdown fences, or JSON string
-                    const cleaned = val.replace(/```json|```/g, '').trim();
-                    // If it looks like JSON array or object, try parse
-                    if (/^[\\[{]/.test(cleaned)) {
-                      try {
-                        const parsed = JSON.parse(cleaned);
-                        if (Array.isArray(parsed)) return parsed;
-                        if (parsed && Array.isArray(parsed.reasons)) return parsed.reasons;
-                      } catch {
-                        // fall through to split
-                      }
+                    try {
+                      const parsed = JSON.parse(val);
+                      return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                      return [];
                     }
-                    // Fallback: split by newlines or semicolons into bullet list
-                    return cleaned
-                      .split(/\\r?\\n|;|\\u2022|\\*/g)
-                      .map(s => s.trim())
-                      .filter(Boolean);
                   }
-                  if (typeof val === 'object' && Array.isArray(val.reasons)) return val.reasons;
                   return [];
                 };
-                const reasons = normalizeReasons(matchResult.reasons);
+
+                const matchedSkills = normalizeArray(matchResult.reasons);
+                const missingSkills = normalizeArray(matchResult.missing_skills);
+                const suggestedTests = normalizeArray(matchResult.suggested_tests);
+                const completedTests = normalizeArray(matchResult.completed_tests);
+                const keyInsights = normalizeArray(matchResult.key_insights);
+
                 return (
-                  <div className={`surface-card p-4 border-l-4 ${
-                    matchResult.score > 0.5 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  }`} data-testid="cv-match-result">
-                    <h6 className="font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Match Result</h6>
-                    <p className="mb-3 text-neutral-800 dark:text-neutral-200"><strong className="text-neutral-900 dark:text-neutral-100">Score:</strong> {(matchResult.score * 100).toFixed(0)}%</p>
-                    <div>
-                      <strong className="text-neutral-900 dark:text-neutral-100">Key Reasons:</strong>
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        {reasons.map((reason, index) => (
-                          <li key={index} className="text-sm text-neutral-700 dark:text-neutral-300">{reason}</li>
-                        ))}
-                      </ul>
+                  <div className="space-y-6">
+                    {/* Overall Score */}
+                    <div className={`surface-card p-4 border-l-4 ${
+                      matchResult.score > 0.7 ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : 
+                      matchResult.score > 0.4 ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
+                      'border-red-500 bg-red-50 dark:bg-red-900/20'
+                    }`} data-testid="cv-match-result">
+                      <div className="flex items-center justify-between mb-3">
+                        <h6 className="font-semibold text-neutral-900 dark:text-neutral-100">CV Match Analysis</h6>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          matchResult.score > 0.7 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                          matchResult.score > 0.4 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                          'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                        }`}>
+                          {(matchResult.score * 100).toFixed(0)}% Match
+                        </span>
+                      </div>
+                      
+                      {keyInsights.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-2"><strong>Key Insights:</strong></p>
+                          <ul className="list-disc list-inside space-y-1">
+                            {keyInsights.map((insight, index) => (
+                              <li key={index} className="text-sm text-neutral-700 dark:text-neutral-300">{insight}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
+
+                    {/* Matched Skills */}
+                    {matchedSkills.length > 0 && (
+                      <div className="surface-card p-4 border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20">
+                        <h6 className="font-semibold text-green-900 dark:text-green-100 mb-3">✅ Skills & Experience Matches</h6>
+                        <ul className="space-y-2">
+                          {matchedSkills.map((skill, index) => (
+                            <li key={index} className="text-sm text-green-800 dark:text-green-200 flex items-start">
+                              <span className="text-green-600 dark:text-green-400 mr-2">•</span>
+                              {skill}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Missing Skills */}
+                    {missingSkills.length > 0 && (
+                      <div className="surface-card p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
+                        <h6 className="font-semibold text-red-900 dark:text-red-100 mb-3">❌ Skill Gaps Identified</h6>
+                        <ul className="space-y-2">
+                          {missingSkills.map((skill, index) => (
+                            <li key={index} className="text-sm text-red-800 dark:text-red-200 flex items-start">
+                              <span className="text-red-600 dark:text-red-400 mr-2">•</span>
+                              {skill}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Test Recommendations */}
+                    {suggestedTests.length > 0 && (
+                      <div className="surface-card p-4 border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
+                        <div className="flex items-center justify-between mb-3">
+                          <h6 className="font-semibold text-blue-900 dark:text-blue-100">🎯 Suggested Skills Tests</h6>
+                          <button
+                            onClick={() => navigate('/test')}
+                            className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
+                          >
+                            Take Tests
+                          </button>
+                        </div>
+                        <p className="text-sm text-blue-800 dark:text-blue-200 mb-3">
+                          Improve your profile by completing these skills tests:
+                        </p>
+                        <ul className="space-y-2">
+                          {suggestedTests.map((test, index) => (
+                            <li key={index} className="text-sm text-blue-800 dark:text-blue-200 flex items-start">
+                              <span className="text-blue-600 dark:text-blue-400 mr-2">•</span>
+                              {test}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Completed Tests */}
+                    {completedTests.length > 0 && (
+                      <div className="surface-card p-4 border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
+                        <h6 className="font-semibold text-purple-900 dark:text-purple-100 mb-3">🏆 Completed Skills Tests</h6>
+                        <div className="grid gap-3">
+                          {completedTests.map((test, index) => (
+                            <div key={index} className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg">
+                              <div>
+                                <p className="font-medium text-purple-900 dark:text-purple-100">{test.skill}</p>
+                                <p className="text-sm text-purple-700 dark:text-purple-300">{test.date}</p>
+                              </div>
+                              <span className={`px-2 py-1 rounded-full text-sm font-medium ${
+                                test.score >= 80 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                test.score >= 60 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+                              }`}>
+                                {test.score}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}

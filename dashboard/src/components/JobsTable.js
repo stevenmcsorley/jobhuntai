@@ -129,7 +129,7 @@ const JobsTable = ({ title, icon, jobs, columns, statsConfig, onAnalyze, analyzi
           );
         }
 
-        if (hasDescription && onScheduleInterview) {
+        if (hasDescription && onScheduleInterview && job.status === 'applied') {
           dropdownItems.push(
             <button
               key="schedule-interview"

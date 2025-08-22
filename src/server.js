@@ -23,30 +23,35 @@ const fs = require('fs').promises;
 const { runProactiveHunt } = require('./services/proactiveHunter');
 
 const profileRoutes = require('./api/routes/profile');
+const cvRoutes = require('./api/routes/cv');
+const authRoutes = require('./api/routes/auth');
+const { authenticateToken } = require('./middleware/auth');
 
 const config = require('../config.json');
 
 const app = express();
 app.use(express.json({ limit: '5mb' })); // Increase limit for CV content
 
+app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/cv', cvRoutes);
 
 const PORT = process.env.PORT || 5003;
 
 // -- Routes --
 
-// GET /jobs - list all jobs
-app.get('/api/jobs', async (req, res) => {
+// GET /jobs - list all jobs for authenticated user
+app.get('/api/jobs', authenticateToken, async (req, res) => {
   try {
-    const jobs = await knex('jobs').select('*');
+    const jobs = await knex('jobs').where({ user_id: req.user.id }).select('*');
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST /api/jobs - manually add a new job
-app.post('/api/jobs', async (req, res) => {
+// POST /api/jobs - manually add a new job for authenticated user
+app.post('/api/jobs', authenticateToken, async (req, res) => {
   try {
     const { title, company, location, url, description } = req.body;
 
@@ -63,7 +68,8 @@ app.post('/api/jobs', async (req, res) => {
         url,
         description,
         scraped_at: new Date().toISOString(),
-        source: 'manual'
+        source: 'manual',
+        user_id: req.user.id
       };
       const [insertedJob] = await trx('jobs').insert(job).returning('*');
 
@@ -71,7 +77,8 @@ app.post('/api/jobs', async (req, res) => {
         job_id: insertedJob.id,
         status: 'followup', // Start in the 'Follow-up' list
         applied_at: new Date().toISOString(),
-        meta: JSON.stringify({ note: 'Manually added job.' })
+        meta: JSON.stringify({ note: 'Manually added job.' }),
+        user_id: req.user.id
       };
       const [insertedApp] = await trx('applications').insert(application).returning('*');
 
@@ -91,7 +98,7 @@ app.post('/api/jobs', async (req, res) => {
 });
 
 // POST /api/jobs/bulk - bulk add new jobs from JSON
-app.post('/api/jobs/bulk', async (req, res) => {
+app.post('/api/jobs/bulk', authenticateToken, async (req, res) => {
   try {
     const jobs = req.body;
 
@@ -252,14 +259,14 @@ app.post('/api/jobs/scrape', async (req, res) => {
   }
 });
 
-// POST /jobs/:id/match - run CV matcher on one job
-app.post('/api/jobs/:id/match', async (req, res) => {
+// POST /jobs/:id/match - run CV matcher on one job for authenticated user
+app.post('/api/jobs/:id/match', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
         }
-        const result = await matcher.matchJob(knex, job);
+        const result = await matcher.matchJob(knex, job, req.user.id);
         res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -267,9 +274,9 @@ app.post('/api/jobs/:id/match', async (req, res) => {
 });
 
 // POST /jobs/:id/apply - attempt application
-app.post('/api/jobs/:id/apply', async (req, res) => {
+app.post('/api/jobs/:id/apply', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
         }
@@ -283,9 +290,9 @@ app.post('/api/jobs/:id/apply', async (req, res) => {
 });
 
 // POST /api/jobs/:id/analyze - scrape and store job description
-app.post('/api/jobs/:id/analyze', async (req, res) => {
+app.post('/api/jobs/:id/analyze', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
         }
@@ -297,9 +304,9 @@ app.post('/api/jobs/:id/analyze', async (req, res) => {
 });
 
 // POST /api/jobs/:id/interview-prep - generate interview prep
-app.post('/api/jobs/:id/interview-prep', async (req, res) => {
+app.post('/api/jobs/:id/interview-prep', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job || !job.description) {
             return res.status(400).json({ error: 'Job must be analyzed first' });
         }
@@ -320,9 +327,9 @@ app.post('/api/jobs/:id/interview-prep', async (req, res) => {
 });
 
 // POST /api/jobs/:id/generate-cover-letter - generate a cover letter
-app.post('/api/jobs/:id/generate-cover-letter', async (req, res) => {
+app.post('/api/jobs/:id/generate-cover-letter', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job || !job.description) {
             return res.status(400).json({ error: 'Job must be analyzed first' });
         }
@@ -347,9 +354,9 @@ app.post('/api/jobs/:id/generate-cover-letter', async (req, res) => {
 });
 
 // POST /api/jobs/:id/generate-company-info - generate company info
-app.post('/api/jobs/:id/generate-company-info', async (req, res) => {
+app.post('/api/jobs/:id/generate-company-info', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job || !job.company) {
             return res.status(400).json({ error: 'Job must have a company name' });
         }
@@ -368,9 +375,9 @@ app.post('/api/jobs/:id/generate-company-info', async (req, res) => {
 });
 
 // POST /api/jobs/:id/auto-apply - trigger the auto-apply logic for a single job
-app.post('/api/jobs/:id/auto-apply', async (req, res) => {
+app.post('/api/jobs/:id/auto-apply', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job) {
             return res.status(404).json({ error: 'Job not found' });
         }
@@ -391,9 +398,9 @@ app.post('/api/jobs/:id/auto-apply', async (req, res) => {
 });
 
 // POST /api/jobs/:id/tailor-cv - generate a tailored CV
-app.post('/api/jobs/:id/tailor-cv', async (req, res) => {
+app.post('/api/jobs/:id/tailor-cv', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job || !job.description) {
             return res.status(400).json({ error: 'Job must be analyzed first' });
         }
@@ -416,9 +423,9 @@ app.post('/api/jobs/:id/tailor-cv', async (req, res) => {
 });
 
 // POST /api/jobs/:id/extract-skills - extract skills from a job description
-app.post('/api/jobs/:id/extract-skills', async (req, res) => {
+app.post('/api/jobs/:id/extract-skills', authenticateToken, async (req, res) => {
     try {
-        const job = await knex('jobs').where({ id: req.params.id }).first();
+        const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
         if (!job || !job.description) {
             return res.status(400).json({ error: 'Job must have a description to extract skills.' });
         }
@@ -438,17 +445,17 @@ app.post('/api/jobs/:id/extract-skills', async (req, res) => {
 
 
 // PATCH /api/jobs/:id - update a job's details
-app.patch('/api/jobs/:id', async (req, res) => {
+app.patch('/api/jobs/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { description } = req.body;
 
         const updatedCount = await knex('jobs')
-            .where({ id })
+            .where({ id, user_id: req.user.id })
             .update({ description });
 
         if (updatedCount > 0) {
-            const updatedJob = await knex('jobs').where({ id }).first();
+            const updatedJob = await knex('jobs').where({ id, user_id: req.user.id }).first();
             res.json(updatedJob);
         } else {
             res.status(404).json({ error: 'Job not found' });
@@ -459,27 +466,27 @@ app.patch('/api/jobs/:id', async (req, res) => {
 });
 
 
-// GET /applications
-app.get('/api/applications', async (req, res) => {
+// GET /applications for authenticated user
+app.get('/api/applications', authenticateToken, async (req, res) => {
     try {
-        const applications = await knex('applications').select('*');
+        const applications = await knex('applications').where({ user_id: req.user.id }).select('*');
         res.json(applications);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// PATCH /api/applications/:id - update application status
-app.patch('/api/applications/:id', async (req, res) => {
+// PATCH /api/applications/:id - update application status for authenticated user
+app.patch('/api/applications/:id', authenticateToken, async (req, res) => {
     try {
         const { status } = req.body;
         const { id } = req.params;
         const updatedCount = await knex('applications')
-            .where({ id })
+            .where({ id, user_id: req.user.id })
             .update({ status });
 
         if (updatedCount > 0) {
-            const updatedApplication = await knex('applications').where({ id }).first();
+            const updatedApplication = await knex('applications').where({ id, user_id: req.user.id }).first();
             res.json(updatedApplication);
         } else {
             res.status(404).json({ error: 'Application not found' });
@@ -490,9 +497,16 @@ app.patch('/api/applications/:id', async (req, res) => {
 });
 
 // GET /api/applications/:id/notes - get all notes for an application
-app.get('/api/applications/:id/notes', async (req, res) => {
+app.get('/api/applications/:id/notes', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Verify the application belongs to the user
+        const application = await knex('applications').where({ id, user_id: req.user.id }).first();
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found.' });
+        }
+        
         const notes = await knex('application_notes')
             .where({ application_id: id })
             .orderBy('created_at', 'desc');
@@ -503,13 +517,19 @@ app.get('/api/applications/:id/notes', async (req, res) => {
 });
 
 // POST /api/applications/:id/notes - add a new note to an application
-app.post('/api/applications/:id/notes', async (req, res) => {
+app.post('/api/applications/:id/notes', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const { note } = req.body;
 
         if (!note) {
             return res.status(400).json({ error: 'Note content is required.' });
+        }
+
+        // Verify the application belongs to the user
+        const application = await knex('applications').where({ id, user_id: req.user.id }).first();
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found.' });
         }
 
         const [newNote] = await knex('application_notes').insert({
@@ -524,7 +544,7 @@ app.post('/api/applications/:id/notes', async (req, res) => {
 });
 
 // DELETE /api/applications/:id - delete an application and associated job
-app.delete('/api/applications/:id', async (req, res) => {
+app.delete('/api/applications/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const appToDelete = await knex('applications').where({ id }).first();
@@ -550,9 +570,9 @@ app.delete('/api/applications/:id', async (req, res) => {
 });
 
 // GET /matches
-app.get('/api/matches', async (req, res) => {
+app.get('/api/matches', authenticateToken, async (req, res) => {
     try {
-        const matches = await knex('matches').select('*');
+        const matches = await knex('matches').where('user_id', req.user.id).select('*');
         res.json(matches);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -560,42 +580,51 @@ app.get('/api/matches', async (req, res) => {
 });
 
 // GET /api/stats - get dashboard stats
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', authenticateToken, async (req, res) => {
     try {
         const today = new Date().toISOString().slice(0, 10);
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
         const appliedTodayPromise = knex('applications')
-            .where('status', 'applied')
-            .andWhere('applied_at', '>=', today)
-            .count('id as count')
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('applications.status', 'applied')
+            .andWhere('jobs.user_id', req.user.id)
+            .andWhere('applications.applied_at', '>=', today)
+            .count('applications.id as count')
             .first();
 
         const appliedThisWeekPromise = knex('applications')
-            .where('status', 'applied')
-            .andWhere('applied_at', '>=', sevenDaysAgo)
-            .count('id as count')
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('applications.status', 'applied')
+            .andWhere('jobs.user_id', req.user.id)
+            .andWhere('applications.applied_at', '>=', sevenDaysAgo)
+            .count('applications.id as count')
             .first();
 
         const applicationsByDayPromise = knex('applications')
-            .select(knex.raw("strftime('%Y-%m-%d', applied_at) as date"))
-            .count('id as count')
-            .where('status', 'applied')
-            .andWhere('applied_at', '>=', sevenDaysAgo)
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .select(knex.raw("strftime('%Y-%m-%d', applications.applied_at) as date"))
+            .count('applications.id as count')
+            .where('applications.status', 'applied')
+            .andWhere('jobs.user_id', req.user.id)
+            .andWhere('applications.applied_at', '>=', sevenDaysAgo)
             .groupBy('date');
             
         const sourcePerformancePromise = knex('jobs')
             .join('applications', 'jobs.id', '=', 'applications.job_id')
             .where('applications.status', 'applied')
-            .select('source')
+            .andWhere('jobs.user_id', req.user.id)
+            .select('jobs.source')
             .count('applications.id as count')
-            .groupBy('source')
+            .groupBy('jobs.source')
             .orderBy('count', 'desc');
 
         const statusBreakdownPromise = knex('applications')
-            .select('status')
-            .count('id as count')
-            .groupBy('status')
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('jobs.user_id', req.user.id)
+            .select('applications.status')
+            .count('applications.id as count')
+            .groupBy('applications.status')
             .orderBy('count', 'desc');
 
         const [
@@ -624,41 +653,15 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
-// GET /api/cv - get CV content
-app.get('/api/cv', async (req, res) => {
-    try {
-        const cvPath = path.resolve(__dirname, '../cv.txt');
-        const cvContent = await fs.readFile(cvPath, 'utf-8');
-        res.json({ content: cvContent });
-    } catch (err) {
-        if (err.code === 'ENOENT') {
-            return res.json({ content: '' }); // Return empty if file doesn't exist
-        }
-        res.status(500).json({ error: 'Failed to read CV file.', details: err.message });
-    }
-});
 
-// POST /api/cv - update CV content
-app.post('/api/cv', async (req, res) => {
-    try {
-        const { content } = req.body;
-        if (typeof content !== 'string') {
-            return res.status(400).json({ error: 'Invalid content provided.' });
-        }
-        const cvPath = path.resolve(__dirname, '../cv.txt');
-        await fs.writeFile(cvPath, content, 'utf-8');
-        res.json({ message: 'CV updated successfully.' });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to save CV file.', details: err.message });
-    }
-});
-
-// GET /api/interviews - list all interviews
-app.get('/api/interviews', async (req, res) => {
+// GET /api/interviews - list all interviews for authenticated user
+app.get('/api/interviews', authenticateToken, async (req, res) => {
     try {
         const interviews = await knex('interviews')
             .join('applications', 'interviews.application_id', '=', 'applications.id')
             .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('interviews.archived', false) // Only show non-archived interviews
+            .andWhere('applications.user_id', req.user.id) // Filter by user
             .select(
                 'interviews.id',
                 'interviews.interview_date',
@@ -675,7 +678,7 @@ app.get('/api/interviews', async (req, res) => {
 });
 
 // POST /api/applications/:id/interviews - add an interview for an application
-app.post('/api/applications/:id/interviews', async (req, res) => {
+app.post('/api/applications/:id/interviews', authenticateToken, async (req, res) => {
     try {
         const { interview_date, interview_type, notes } = req.body;
         const application_id = req.params.id;
@@ -700,8 +703,64 @@ app.post('/api/applications/:id/interviews', async (req, res) => {
     }
 });
 
+// PATCH /api/interviews/:id - update an interview
+app.patch('/api/interviews/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { interview_date, interview_type, notes, archived } = req.body;
+
+        // Verify the interview belongs to the user through application ownership
+        const interview = await knex('interviews')
+            .join('applications', 'interviews.application_id', '=', 'applications.id')
+            .where('interviews.id', id)
+            .andWhere('applications.user_id', req.user.id)
+            .select('interviews.*')
+            .first();
+
+        if (!interview) {
+            return res.status(404).json({ error: 'Interview not found' });
+        }
+
+        const updateData = {};
+        if (interview_date !== undefined) updateData.interview_date = interview_date;
+        if (interview_type !== undefined) updateData.interview_type = interview_type;
+        if (notes !== undefined) updateData.notes = notes;
+        if (archived !== undefined) updateData.archived = archived;
+
+        const updatedCount = await knex('interviews')
+            .where({ id })
+            .update(updateData);
+
+        if (updatedCount > 0) {
+            const updatedInterview = await knex('interviews').where({ id }).first();
+            res.json(updatedInterview);
+        } else {
+            res.status(404).json({ error: 'Interview not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update interview.', details: err.message });
+    }
+});
+
+// DELETE /api/interviews/:id - delete an interview
+app.delete('/api/interviews/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const deletedCount = await knex('interviews').where({ id }).del();
+
+        if (deletedCount > 0) {
+            res.status(200).json({ message: 'Interview deleted successfully.' });
+        } else {
+            res.status(404).json({ error: 'Interview not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete interview.', details: err.message });
+    }
+});
+
 // POST /api/applications/:id/apply - apply for a job from an existing application
-app.post('/api/applications/:id/apply', async (req, res) => {
+app.post('/api/applications/:id/apply', authenticateToken, async (req, res) => {
     try {
         const application = await knex('applications').where({ id: req.params.id }).first();
         if (!application) {
@@ -722,10 +781,10 @@ app.post('/api/applications/:id/apply', async (req, res) => {
     }
 });
 
-// GET /api/preferences - get all preferences
-app.get('/api/preferences', async (req, res) => {
+// GET /api/preferences - get all preferences for authenticated user
+app.get('/api/preferences', authenticateToken, async (req, res) => {
     try {
-        const prefs = await knex('preferences').select('*');
+        const prefs = await knex('preferences').where({ user_id: req.user.id }).select('*');
         // Convert from array of {key, value} to a single object
         const preferencesObject = prefs.reduce((obj, item) => {
             obj[item.key] = item.value;
@@ -737,14 +796,14 @@ app.get('/api/preferences', async (req, res) => {
     }
 });
 
-// POST /api/preferences - update preferences
-app.post('/api/preferences', async (req, res) => {
+// POST /api/preferences - update preferences for authenticated user
+app.post('/api/preferences', authenticateToken, async (req, res) => {
     try {
         const preferences = req.body;
         const queries = Object.keys(preferences).map(key => {
             return knex('preferences')
-                .insert({ key, value: preferences[key] })
-                .onConflict('key')
+                .insert({ key, value: preferences[key], user_id: req.user.id })
+                .onConflict(['key', 'user_id'])
                 .merge();
         });
         await Promise.all(queries);
@@ -755,23 +814,27 @@ app.post('/api/preferences', async (req, res) => {
 });
 
 // GET /api/dashboard-stats - get detailed dashboard stats
-app.get('/api/dashboard-stats', async (req, res) => {
+app.get('/api/dashboard-stats', authenticateToken, async (req, res) => {
     try {
         const sourcePerformance = await knex('jobs')
             .join('applications', 'jobs.id', '=', 'applications.job_id')
             .where('applications.status', 'applied')
-            .select('source')
+            .andWhere('jobs.user_id', req.user.id)
+            .select('jobs.source')
             .count('applications.id as count')
-            .groupBy('source')
+            .groupBy('jobs.source')
             .orderBy('count', 'desc');
 
         const statusBreakdown = await knex('applications')
-            .select('status')
-            .count('id as count')
-            .groupBy('status')
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('jobs.user_id', req.user.id)
+            .select('applications.status')
+            .count('applications.id as count')
+            .groupBy('applications.status')
             .orderBy('count', 'desc');
 
         const companyFrequency = await knex('jobs')
+            .where('user_id', req.user.id)
             .select('company')
             .count('id as count')
             .groupBy('company')
@@ -779,9 +842,11 @@ app.get('/api/dashboard-stats', async (req, res) => {
             .limit(10);
 
         const weeklySubmissions = await knex('applications')
-            .select(knex.raw("strftime('%Y-%W', applied_at) as week"))
-            .count('id as count')
-            .where('status', 'applied')
+            .join('jobs', 'applications.job_id', '=', 'jobs.id')
+            .where('applications.status', 'applied')
+            .andWhere('jobs.user_id', req.user.id)
+            .select(knex.raw("strftime('%Y-%W', applications.applied_at) as week"))
+            .count('applications.id as count')
             .groupBy('week')
             .orderBy('week', 'asc');
 
@@ -810,9 +875,9 @@ app.post('/api/hunt', async (req, res) => {
 });
 
 // GET /api/market-fit - analyze job descriptions for skill frequency
-app.get('/api/market-fit', async (req, res) => {
+app.get('/api/market-fit', authenticateToken, async (req, res) => {
     try {
-        const jobsWithSkills = await knex('jobs').whereNotNull('skills').select('skills');
+        const jobsWithSkills = await knex('jobs').where('user_id', req.user.id).whereNotNull('skills').select('skills');
         const totalJobs = jobsWithSkills.length;
 
         if (totalJobs === 0) {
@@ -854,7 +919,7 @@ app.get('/api/market-fit', async (req, res) => {
 // -- Test Hub Endpoints --
 
 // POST /api/tests/start - Start a new test session
-app.post('/api/tests/start', async (req, res) => {
+app.post('/api/tests/start', authenticateToken, async (req, res) => {
     try {
         const { skill, difficulty, type } = req.body;
         if (!skill || !difficulty || !type) {
@@ -868,6 +933,7 @@ app.post('/api/tests/start', async (req, res) => {
             skill,
             difficulty,
             type,
+            user_id: req.user.id,
             completed_at: new Date().toISOString()
         }).returning('*');
 
@@ -892,7 +958,7 @@ app.post('/api/tests/start', async (req, res) => {
 });
 
 // POST /api/tests/submit-answer - Submit an answer and get the next question
-app.post('/api/tests/submit-answer', async (req, res) => {
+app.post('/api/tests/submit-answer', authenticateToken, async (req, res) => {
     try {
         const { result_id, answer } = req.body;
         const result = await knex('test_results').where({ id: result_id }).first();
@@ -944,10 +1010,13 @@ app.post('/api/tests/submit-answer', async (req, res) => {
     }
 });
 
-// GET /api/tests/history - Get all past test sessions
-app.get('/api/tests/history', async (req, res) => {
+// GET /api/tests/history - Get all past test sessions for authenticated user
+app.get('/api/tests/history', authenticateToken, async (req, res) => {
     try {
-        const history = await knex('test_sessions').select('*').orderBy('completed_at', 'desc');
+        const history = await knex('test_sessions')
+            .where({ user_id: req.user.id })
+            .select('*')
+            .orderBy('completed_at', 'desc');
         res.json(history);
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch test history.', details: err.message });
@@ -955,10 +1024,10 @@ app.get('/api/tests/history', async (req, res) => {
 });
 
 // GET /api/tests/sessions/:id - Get the full results for a single test session
-app.get('/api/tests/sessions/:id', async (req, res) => {
+app.get('/api/tests/sessions/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const session = await knex('test_sessions').where({ id }).first();
+        const session = await knex('test_sessions').where({ id, user_id: req.user.id }).first();
         if (!session) {
             return res.status(404).json({ error: 'Test session not found.' });
         }
@@ -975,10 +1044,10 @@ app.get('/api/tests/prompts', (req, res) => {
 });
 
 // POST /api/tests/sessions/:id/reset-incorrect - Reset incorrect answers for a session to allow a retake
-app.post('/api/tests/sessions/:id/reset-incorrect', async (req, res) => {
+app.post('/api/tests/sessions/:id/reset-incorrect', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const session = await knex('test_sessions').where({ id }).first();
+        const session = await knex('test_sessions').where({ id, user_id: req.user.id }).first();
         if (!session) {
             return res.status(404).json({ error: 'Test session not found.' });
         }
@@ -1017,10 +1086,10 @@ app.post('/api/tests/sessions/:id/reset-incorrect', async (req, res) => {
 });
 
 // GET /api/tests/sessions/:id/continue - Continue an in-progress test
-app.get('/api/tests/sessions/:id/continue', async (req, res) => {
+app.get('/api/tests/sessions/:id/continue', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const session = await knex('test_sessions').where({ id }).first();
+        const session = await knex('test_sessions').where({ id, user_id: req.user.id }).first();
         if (!session) {
             return res.status(404).json({ error: 'Test session not found.' });
         }
@@ -1051,11 +1120,11 @@ app.get('/api/tests/sessions/:id/continue', async (req, res) => {
 });
 
 // DELETE /api/tests/sessions/:id - Delete a test session and all its results
-app.delete('/api/tests/sessions/:id', async (req, res) => {
+app.delete('/api/tests/sessions/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         // The 'onDelete("CASCADE")' in the migration will handle deleting the associated test_results.
-        const deletedCount = await knex('test_sessions').where({ id }).del();
+        const deletedCount = await knex('test_sessions').where({ id, user_id: req.user.id }).del();
 
         if (deletedCount > 0) {
             res.status(200).json({ message: 'Test session deleted successfully.' });
@@ -1071,8 +1140,9 @@ app.delete('/api/tests/sessions/:id', async (req, res) => {
 // -- Guidance Hub Endpoints --
 
 // GET /api/guidance/summary - Get enhanced summary with progress trends
-app.get('/api/guidance/summary', asyncHandler(async (req, res) => {
+app.get('/api/guidance/summary', authenticateToken, asyncHandler(async (req, res) => {
     const summary = await knex('test_sessions')
+        .where('user_id', req.user.id)
         .select('skill')
         .avg('score as average_score')
         .count('* as session_count')
@@ -1082,7 +1152,7 @@ app.get('/api/guidance/summary', asyncHandler(async (req, res) => {
 
     // Add progress trends for each skill
     const enhancedSummary = await Promise.all(summary.map(async (item) => {
-        const progressTrends = await guidanceGenerator.analyzeProgressTrends(item.skill, knex);
+        const progressTrends = await guidanceGenerator.analyzeProgressTrends(item.skill, knex, req.user.id);
         return {
             ...item,
             average_score: Math.round(item.average_score),
@@ -1097,17 +1167,18 @@ app.get('/api/guidance/summary', asyncHandler(async (req, res) => {
 }));
 
 // GET /api/guidance/:topic - Get enhanced learning plan with analytics
-app.get('/api/guidance/:topic', asyncHandler(async (req, res) => {
+app.get('/api/guidance/:topic', authenticateToken, asyncHandler(async (req, res) => {
     const { topic } = req.params;
     
     const incorrectResults = await knex('test_sessions')
         .join('test_results', 'test_sessions.id', '=', 'test_results.session_id')
         .where('test_sessions.skill', topic)
+        .andWhere('test_sessions.user_id', req.user.id)
         .andWhereNot('test_results.is_correct', true)
         .select('test_results.*', 'test_sessions.completed_at');
 
     if (incorrectResults.length === 0) {
-        const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+        const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex, req.user.id);
         return res.json({
             guidance: {
                 summary_of_weaknesses: "No weaknesses found for this topic!",
@@ -1138,14 +1209,14 @@ app.get('/api/guidance/:topic', asyncHandler(async (req, res) => {
     const incorrectResultIds = incorrectResults.map(r => r.id).sort();
 
     // Check for existing, valid guidance
-    const savedGuidance = await knex('guidance').where({ skill: topic }).first();
+    const savedGuidance = await knex('guidance').where({ skill: topic, user_id: req.user.id }).first();
     if (savedGuidance) {
         const savedResultIds = JSON.parse(savedGuidance.source_result_ids).sort();
         if (JSON.stringify(incorrectResultIds) === JSON.stringify(savedResultIds)) {
             console.log(`🧠 Found valid saved guidance for "${topic}". Serving from cache.`);
             
             const guidance = JSON.parse(savedGuidance.guidance_text);
-            const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+            const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex, req.user.id);
             const studySchedule = guidanceGenerator.generateStudySchedule(guidance.learning_plan || []);
             
             return res.json({
@@ -1166,17 +1237,18 @@ app.get('/api/guidance/:topic', asyncHandler(async (req, res) => {
     const guidance = await guidanceGenerator.generateGuidance(topic, incorrectResults);
     
     // Generate analytics
-    const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex);
+    const progressTrends = await guidanceGenerator.analyzeProgressTrends(topic, knex, req.user.id);
     const studySchedule = guidanceGenerator.generateStudySchedule(guidance.learning_plan || []);
 
     // Save the new guidance to the database
     await knex('guidance')
         .insert({
             skill: topic,
+            user_id: req.user.id,
             guidance_text: JSON.stringify(guidance),
             source_result_ids: JSON.stringify(incorrectResultIds)
         })
-        .onConflict('skill')
+        .onConflict(['skill', 'user_id'])
         .merge();
     
     console.log(`💾 Saved enhanced guidance for "${topic}" to the database.`);

@@ -28,7 +28,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3001 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -41,6 +41,8 @@
     "test:dark-mode": "cypress run --spec 'cypress/e2e/dark-mode-ux.feature'",
     "test:dashboard": "cypress run --spec 'cypress/e2e/dashboard.feature'",
     "test:test-hub": "cypress run --spec 'cypress/e2e/test-hub.feature'",
+    "test:auth": "cypress run --config-file cypress.config.auth.js",
+    "test:auth:open": "start-server-and-test start http://localhost:3001 'cypress open --config-file cypress.config.auth.js'",
     "capture:screenshots": "cypress run --config video=false --reporter spec",
     "analyze:ux": "cypress run --config video=false screenshotOnRunFailure=true --spec 'cypress/e2e/dark-mode-ux.feature,cypress/e2e/dashboard.feature'"
   },
@@ -69,6 +71,7 @@
     "autoprefixer": "^10.4.21",
     "cypress": "^14.5.4",
     "cypress-real-events": "^1.14.0",
+    "http-proxy-middleware": "^3.0.5",
     "postcss": "^8.5.6",
     "start-server-and-test": "^2.0.13",
     "tailwindcss": "^3.4.17"

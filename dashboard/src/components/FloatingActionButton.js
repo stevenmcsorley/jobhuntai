@@ -60,7 +60,7 @@ const FloatingActionButton = ({ onCommandPalette }) => {
   ];
 
   return (
-    <div className="fixed bottom-8 right-8 z-40">
+    <div className="fixed bottom-6 right-6 lg:bottom-8 lg:right-8 xl:bottom-20 xl:right-8 z-30 hidden">
       {/* Action Items */}
       {isExpanded && (
         <div className="absolute bottom-16 right-0 space-y-3 animate-slide-up">
@@ -80,11 +80,11 @@ const FloatingActionButton = ({ onCommandPalette }) => {
               </div>
               <button
                 onClick={action.onClick}
-                className={`group w-12 h-12 rounded-full bg-gradient-to-r ${action.color} text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center ring-2 ring-white/20`}
+                className={`group w-10 h-10 rounded-full bg-gradient-to-r ${action.color} text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center ring-2 ring-white/20`}
               >
                 <FontAwesomeIcon 
                   icon={action.icon} 
-                  className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" 
+                  className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" 
                 />
               </button>
             </div>
@@ -95,13 +95,13 @@ const FloatingActionButton = ({ onCommandPalette }) => {
       {/* Main FAB */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`group w-16 h-16 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-2xl hover:shadow-violet-500/25 transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center ring-4 ring-violet-500/20 ${
+        className={`group w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-2xl hover:shadow-violet-500/25 transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center ring-2 ring-violet-500/20 ${
           isExpanded ? 'rotate-45' : 'rotate-0'
         }`}
       >
         <FontAwesomeIcon 
           icon={isExpanded ? faTimes : faPlus} 
-          className="w-6 h-6 transition-all duration-300 group-hover:scale-110" 
+          className="w-4 h-4 transition-all duration-300 group-hover:scale-110" 
         />
         
         {/* Pulsing ring */}

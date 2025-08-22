@@ -98,10 +98,16 @@ async function generateGuidance(topic, incorrectResults) {
 /**
  * Analyzes learning progress over time
  */
-async function analyzeProgressTrends(topic, knex) {
+async function analyzeProgressTrends(topic, knex, userId = null) {
   try {
-    const recentSessions = await knex('test_sessions')
-      .where('skill', topic)
+    let query = knex('test_sessions')
+      .where('skill', topic);
+    
+    if (userId) {
+      query = query.where('user_id', userId);
+    }
+    
+    const recentSessions = await query
       .orderBy('completed_at', 'desc')
       .limit(10)
       .select('score', 'completed_at');

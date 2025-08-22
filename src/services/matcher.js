@@ -11,8 +11,8 @@ if (!GROQ_API_KEY) {
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-async function matchJob(knex, job) {
-  console.log(`🔍 CV-matching for: ${job.title}`);
+async function matchJob(knex, job, userId) {
+  console.log(`🔍 CV-matching for: ${job.title} (User: ${userId})`);
 
   // Use the description already saved in the database
   const description = job.description;
@@ -22,7 +22,27 @@ async function matchJob(knex, job) {
     return { match: false, score: 0, reasons: ['missing-description'] };
   }
 
-  const cvText = await fs.readFile(CV_PATH, 'utf8');
+  // Get CV from database for specific user
+  const cvData = await knex('cvs').where({ user_id: userId }).first();
+  const cvText = cvData?.content || '';
+
+  if (!cvText) {
+    console.warn(`⚠️ No CV content found in database for user ${userId}, cannot match.`);
+    return { match: false, score: 0, reasons: ['missing-cv'] };
+  }
+
+  // Get test data to integrate with matching for specific user
+  const testData = await knex('test_sessions')
+    .select('skill', 'score', 'completed_at')
+    .where({ user_id: userId })
+    .andWhere('score', '>', 60) // Only include passed tests
+    .orderBy('completed_at', 'desc');
+
+  const skillsWithTests = testData.map(t => ({
+    skill: t.skill.toLowerCase(),
+    score: t.score,
+    completed_at: t.completed_at
+  }));
 
   try {
     const chat = await groq.chat.completions.create({
@@ -30,8 +50,13 @@ async function matchJob(knex, job) {
       messages: [
         {
           role: 'system',
-          content:
-            "You are a precise CV analysis agent. Your task is to compare a candidate's CV against a job description and identify the key reasons for a match, based *only* on the information explicitly stated in the CV."
+          content: `You are an expert CV analysis agent. Analyze the candidate's CV against the job description with complete accuracy. Base your assessment ONLY on what is explicitly stated in the CV - do not infer or assume skills not mentioned.
+
+Your analysis must:
+1. Only include skills/experience that are explicitly mentioned in the CV
+2. Identify specific skill gaps (requirements mentioned in job but missing from CV)
+3. Be precise about matches vs mismatches
+4. Provide specific evidence from the CV for each match`
         },
         {
           role: 'user',
@@ -46,11 +71,20 @@ Job Description:
 ${description}
 ---
 
-Assess the suitability of the candidate for the job based *strictly* on the provided CV. Do not infer or add skills not explicitly listed. Return ONLY valid JSON with the following keys:
-- match: boolean (true if the CV is a strong match for the role)
-- score: number between 0 and 1, representing the degree of match
-- key_reasons: array of strings, where each string is a key reason for the match, quoting or summarizing a specific point *from the CV* that aligns with the job description.
-`
+Test Results Available:
+${skillsWithTests.length > 0 ? skillsWithTests.map(s => `- ${s.skill}: ${s.score}% (completed ${s.completed_at})`).join('\n') : 'No test results available'}
+
+Analyze this CV against the job requirements. Return ONLY valid JSON with these keys:
+
+- match: boolean (true if 70%+ of core requirements are met)
+- score: number 0-1 (percentage of requirements matched from CV)
+- matched_skills: array of strings (skills/experience from CV that match job requirements - quote specific evidence)
+- missing_skills: array of strings (required skills mentioned in job but not found in CV)
+- suggested_tests: array of strings (skills from missing_skills that could be tested in test hub)
+- completed_tests: array of objects with {skill, score, date} for relevant completed tests
+- key_insights: array of strings (specific observations about fit based on CV content)
+
+Be extremely precise - only include skills actually mentioned in the CV, not inferred ones.`
         }
       ],
       response_format: { type: 'json_object' }
@@ -59,27 +93,39 @@ Assess the suitability of the candidate for the job based *strictly* on the prov
     const result = JSON.parse(chat.choices[0].message.content || '{}');
     console.log(`✅ CV-match result: ${JSON.stringify(result)}`);
 
+    // Prepare enhanced match data
+    const matchData = {
+      match: result.match || false,
+      score: result.score || 0,
+      reasons: JSON.stringify(result.matched_skills || []),
+      missing_skills: JSON.stringify(result.missing_skills || []),
+      suggested_tests: JSON.stringify(result.suggested_tests || []),
+      completed_tests: JSON.stringify(result.completed_tests || []),
+      key_insights: JSON.stringify(result.key_insights || []),
+      checked_at: new Date().toISOString()
+    };
+
     const existingMatch = await knex('matches').where({ job_id: job.id }).first();
 
     let finalResult;
     if (existingMatch) {
-      [finalResult] = await knex('matches').where({ id: existingMatch.id }).update({
-        match: result.match,
-        score: result.score,
-        reasons: JSON.stringify(result.key_reasons || []),
-        checked_at: new Date().toISOString()
-      }).returning('*');
+      [finalResult] = await knex('matches').where({ id: existingMatch.id }).update(matchData).returning('*');
     } else {
       [finalResult] = await knex('matches').insert({
         job_id: job.id,
-        match: result.match,
-        score: result.score,
-        reasons: JSON.stringify(result.key_reasons || []),
-        checked_at: new Date().toISOString()
+        ...matchData
       }).returning('*');
     }
 
-    return finalResult;
+    return {
+      ...finalResult,
+      // Parse JSON fields for easier consumption
+      reasons: JSON.parse(finalResult.reasons || '[]'),
+      missing_skills: JSON.parse(finalResult.missing_skills || '[]'),
+      suggested_tests: JSON.parse(finalResult.suggested_tests || '[]'),
+      completed_tests: JSON.parse(finalResult.completed_tests || '[]'),
+      key_insights: JSON.parse(finalResult.key_insights || '[]')
+    };
   } catch (err) {
     console.error(`❌ Groq error: ${err.message}`);
     return { match: false, score: 0, reasons: ['match-error'] };
