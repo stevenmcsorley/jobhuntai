@@ -97,7 +97,7 @@ const promptMatrix = {
   `
 };
 
-async function generateTestQuestions(topic, difficulty, type = 'short_answer', count = 5) {
+async function generateTestQuestions(topic, difficulty, type = 'short_answer', count = 5, userProfession = null) {
   // Validate input parameters
   validateQuestionParams(topic, difficulty, type, count);
 
@@ -109,7 +109,8 @@ async function generateTestQuestions(topic, difficulty, type = 'short_answer', c
   }
 
   const timer = performanceMonitor.startTimer('generateTestQuestions');
-  console.log(`🤖 Generating ${count} test questions for: ${topic} (${difficulty})`);
+  const contextualTopic = userProfession ? `${topic} in the context of ${userProfession}` : topic;
+  console.log(`🤖 Generating ${count} test questions for: ${contextualTopic} (${difficulty})`);
   
   try {
     const promptTemplate = promptMatrix[type];
@@ -117,7 +118,12 @@ async function generateTestQuestions(topic, difficulty, type = 'short_answer', c
       throw new ValidationError(`Invalid test type: ${type}`, 'type');
     }
 
-    const prompt = promptTemplate.replace('{topic}', topic).replace('{difficulty}', difficulty);
+    // Add professional context to the prompt if profession is provided
+    let enhancedPrompt = promptTemplate.replace('{topic}', contextualTopic).replace('{difficulty}', difficulty);
+    
+    if (userProfession) {
+      enhancedPrompt += `\n\n**Professional Context:**\nThis test is for a ${userProfession}. Frame all questions, scenarios, and examples within the context of their professional field. Ensure the questions are relevant to their career and industry-specific challenges they would face.\n`;
+    }
     const questions = [];
     
     for (let i = 0; i < count; i++) {
@@ -126,7 +132,7 @@ async function generateTestQuestions(topic, difficulty, type = 'short_answer', c
           const chat = await groq.chat.completions.create({
             model: GROQ_MODEL,
             messages: [
-              { role: 'system', content: prompt },
+              { role: 'system', content: enhancedPrompt },
               { role: 'user', content: 'Please generate one question.' }
             ],
             response_format: { type: 'json_object' },

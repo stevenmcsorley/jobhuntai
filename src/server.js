@@ -963,13 +963,33 @@ app.get('/api/market-fit', authenticateToken, async (req, res) => {
 // POST /api/tests/start - Start a new test session
 app.post('/api/tests/start', authenticateToken, async (req, res) => {
     try {
-        const { skill, difficulty, type } = req.body;
+        const { skill, difficulty, type, isFromSuggested = false } = req.body;
         if (!skill || !difficulty || !type) {
             return res.status(400).json({ error: 'Skill, difficulty, and type are required.' });
         }
 
+        // Get user's profession if testing a suggested topic
+        let userProfession = null;
+        if (isFromSuggested) {
+            const profile = await knex('profiles').where({ user_id: req.user.id }).first();
+            // Try to extract profession from profile data or CV
+            if (profile?.summary) {
+                // Simple profession extraction from summary
+                const summary = profile.summary.toLowerCase();
+                if (summary.includes('travel') || summary.includes('consultant')) {
+                    userProfession = 'Travel Professional';
+                } else if (summary.includes('marketing') || summary.includes('brand')) {
+                    userProfession = 'Marketing Professional';
+                } else if (summary.includes('nurse') || summary.includes('healthcare') || summary.includes('medical')) {
+                    userProfession = 'Healthcare Professional';
+                } else if (summary.includes('developer') || summary.includes('software') || summary.includes('engineer')) {
+                    userProfession = 'Technology Professional';
+                }
+            }
+        }
+
         const questionCount = type === 'code_challenge' ? 1 : 5;
-        const questions = await testGenerator.generateTestQuestions(skill, difficulty, type, questionCount);
+        const questions = await testGenerator.generateTestQuestions(skill, difficulty, type, questionCount, userProfession);
 
         const [session] = await knex('test_sessions').insert({
             skill,

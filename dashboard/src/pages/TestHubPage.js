@@ -20,10 +20,14 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
   const isBehavioral = type.startsWith('behavioral_');
 
   const handleStart = () => {
+    const finalSkill = isBehavioral ? 'Behavioral' : customSkill || skill;
+    const isFromSuggested = !isBehavioral && !customSkill; // True if using suggested dropdown, false if custom
+    
     onStartTest({
-      skill: isBehavioral ? 'Behavioral' : customSkill || skill,
+      skill: finalSkill,
       difficulty: isBehavioral ? 'N/A' : difficulty,
-      type
+      type,
+      isFromSuggested
     });
   };
 
