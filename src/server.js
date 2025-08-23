@@ -50,6 +50,46 @@ app.get('/api/jobs', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /jobs/:id - get specific job with match results and applications
+app.get('/api/jobs/:id', authenticateToken, async (req, res) => {
+  try {
+    const job = await knex('jobs').where({ id: req.params.id, user_id: req.user.id }).first();
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    // Get match results if they exist (must belong to authenticated user)
+    const matchResult = await knex('matches').where({ job_id: job.id, user_id: req.user.id }).first();
+    
+    // Get application data if it exists
+    const application = await knex('applications').where({ job_id: job.id, user_id: req.user.id }).first();
+
+    // Parse JSON fields from match result
+    let parsedMatchResult = null;
+    if (matchResult) {
+      parsedMatchResult = {
+        ...matchResult,
+        reasons: JSON.parse(matchResult.reasons || '[]'),
+        missing_skills: JSON.parse(matchResult.missing_skills || '[]'),
+        suggested_tests: JSON.parse(matchResult.suggested_tests || '[]'),
+        completed_tests: JSON.parse(matchResult.completed_tests || '[]'),
+        key_insights: JSON.parse(matchResult.key_insights || '[]')
+      };
+    }
+
+    // Return flattened structure that the frontend expects
+    const combinedData = {
+      ...job,
+      ...parsedMatchResult,
+      ...(application || {})
+    };
+    
+    res.json(combinedData);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/jobs - manually add a new job for authenticated user
 app.post('/api/jobs', authenticateToken, async (req, res) => {
   try {
@@ -131,7 +171,8 @@ app.post('/api/jobs/bulk', authenticateToken, async (req, res) => {
             posted,
             salary,
             scraped_at: new Date().toISOString(),
-            source: 'manual-bulk'
+            source: 'manual-bulk',
+            user_id: req.user.id
           };
           
           const [insertedId] = await trx('jobs').insert(job);
@@ -140,7 +181,8 @@ app.post('/api/jobs/bulk', authenticateToken, async (req, res) => {
             job_id: insertedId,
             status: 'opportunity',
             applied_at: new Date().toISOString(),
-            meta: JSON.stringify({ note: 'Bulk imported job.' })
+            meta: JSON.stringify({ note: 'Bulk imported job.' }),
+            user_id: req.user.id
           };
           await trx('applications').insert(application);
           insertedCount++;

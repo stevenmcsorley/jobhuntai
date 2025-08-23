@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { WrenchScrewdriverIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const SkillsSection = ({ skills, onSave }) => {
-  const [newSkill, setNewSkill] = useState({ name: '', category: 'Frontend' });
+  // Get dynamic default category
+  const getDefaultCategory = () => {
+    const categories = [...new Set(skills.map(skill => skill.category))];
+    return categories.length > 0 ? categories[0] : 'Professional Skills';
+  };
+  
+  const [newSkill, setNewSkill] = useState({ name: '', category: '' });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update default category when skills change
+  useEffect(() => {
+    const defaultCat = getDefaultCategory();
+    if (!newSkill.category || newSkill.category === '') {
+      setNewSkill(prev => ({ ...prev, category: defaultCat }));
+    }
+  }, [skills]);
 
   const handleAddSkill = async () => {
     if (!newSkill.name || !newSkill.category) {
@@ -16,7 +30,7 @@ const SkillsSection = ({ skills, onSave }) => {
     try {
       const res = await axios.post('/api/profile/skills', newSkill);
       onSave(res.data);
-      setNewSkill({ name: '', category: 'Frontend' });
+      setNewSkill({ name: '', category: getDefaultCategory() });
       toast.success('Skill added!');
     } catch (error) {
       toast.error('Failed to add skill.');
@@ -41,6 +55,15 @@ const SkillsSection = ({ skills, onSave }) => {
     (acc[skill.category] = acc[skill.category] || []).push(skill);
     return acc;
   }, {});
+
+  // Get unique categories from existing skills for the dropdown
+  const existingCategories = [...new Set(skills.map(skill => skill.category))].sort();
+  const availableCategories = existingCategories.length > 0 
+    ? existingCategories 
+    : ['Professional Skills']; // Fallback if no skills exist
+
+  // Set default category for new skills
+  const defaultCategory = availableCategories[0] || 'Professional Skills';
 
   return (
     <div className="glass-card animate-fade-in">
@@ -98,12 +121,15 @@ const SkillsSection = ({ skills, onSave }) => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   disabled={isLoading}
                 >
-                  <option>Frontend</option>
-                  <option>Backend</option>
-                  <option>Database</option>
-                  <option>Testing</option>
-                  <option>Tooling</option>
-                  <option>Other</option>
+                  {availableCategories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                  {!availableCategories.includes('Professional Skills') && (
+                    <option value="Professional Skills">Professional Skills</option>
+                  )}
+                  {!availableCategories.includes('Other') && (
+                    <option value="Other">Other</option>
+                  )}
                 </select>
               </div>
               <div>

@@ -37,6 +37,7 @@ const getFullProfile = async (userId) => {
 
 const { seedProfileFromCv } = require('../../services/profileSeeder');
 const pdfExporter = require('../../services/pdfExporter');
+const skillRecommendationService = require('../../services/skillRecommendationService');
 
 // GET /api/profile - Fetch all master profile data
 router.get('/', async (req, res) => {
@@ -465,6 +466,30 @@ router.post('/export/html', async (req, res) => {
   } catch (err) {
     console.error('Profile HTML export error:', err);
     res.status(500).json({ error: 'Failed to export profile as HTML.', details: err.message });
+  }
+});
+
+// GET /api/profile/skill-recommendations - Get AI-powered skill recommendations
+router.get('/skill-recommendations', async (req, res) => {
+  try {
+    const profileData = await getFullProfile(req.user.id);
+    const recommendations = await skillRecommendationService.generateSkillRecommendations(profileData);
+    
+    res.json({
+      recommendations,
+      generated_at: new Date().toISOString(),
+      profile_analyzed: {
+        skills_count: profileData.skills?.length || 0,
+        experience_count: profileData.work_experiences?.length || 0,
+        education_count: profileData.education?.length || 0
+      }
+    });
+  } catch (err) {
+    console.error('Error generating skill recommendations:', err);
+    res.status(500).json({ 
+      error: 'Failed to generate skill recommendations.', 
+      details: err.message 
+    });
   }
 });
 

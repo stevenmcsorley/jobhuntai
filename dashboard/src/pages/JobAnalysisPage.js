@@ -81,22 +81,15 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
         throw new Error('Application not found');
       }
       
-      // Then get job and match data
-      const [jobRes, matchRes] = await Promise.all([
-        axios.get(`/api/jobs/${appData.job_id}`),
-        axios.get(`/api/matches?job_id=${appData.job_id}`)
-      ]);
-
+      // Get job with all associated match data using the new endpoint
+      const jobRes = await axios.get(`/api/jobs/${appData.job_id}`);
       const jobData = jobRes.data;
-      const matchData = matchRes.data?.[0] || {};
 
       setJob({
         ...jobData,
-        ...matchData,
         ...appData,
         job_id: jobData.id,
-        id: appData.id,
-        reasons: matchData.reasons ? (typeof matchData.reasons === 'string' ? JSON.parse(matchData.reasons) : matchData.reasons) : []
+        id: appData.id
       });
     } catch (error) {
       console.error('Error fetching job details:', error);

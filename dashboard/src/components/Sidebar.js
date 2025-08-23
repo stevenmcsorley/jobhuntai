@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import ThemeToggler from './ThemeToggler';
+import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBriefcase, faStar, faThLarge, faCalendarCheck, faFileAlt, 
-  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut, faSignOutAlt
+  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut, faSignOutAlt, faUser
 } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ opportunitiesCount = 0, onLogout }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { user } = useAuth();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -114,6 +116,31 @@ const Sidebar = ({ opportunitiesCount = 0, onLogout }) => {
 
       {/* Footer */}
       <div className="relative z-10 p-4 border-t border-slate-700/50 space-y-4 bg-slate-900/30 backdrop-blur-sm">
+        {/* User Info Section */}
+        <div className={`animate-fade-in ${isCollapsed ? 'text-center' : ''}`}>
+          {!isCollapsed && (
+            <div className="text-xs text-slate-500 font-medium mb-2">LOGGED IN AS</div>
+          )}
+          <div className={`flex items-center space-x-3 ${isCollapsed ? 'justify-center' : ''}`}>
+            <div className="relative">
+              <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <FontAwesomeIcon icon={faUser} className="text-white w-3 h-3" />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900"></div>
+            </div>
+            {!isCollapsed && user && (
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-white truncate">
+                  {user.name || user.email}
+                </div>
+                <div className="text-xs text-slate-400 truncate">
+                  {user.email}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {!isCollapsed && (
           <div className="mb-4 animate-fade-in">
             <div className="text-xs text-slate-500 font-medium mb-2">SYSTEM STATUS</div>

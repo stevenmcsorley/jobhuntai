@@ -61,7 +61,13 @@ Your analysis must:
 3. Be precise about matches vs mismatches
 4. Provide specific evidence from the CV for each match
 5. For test handling: Only exclude skills from suggested_tests if user scored >60% (passing), include skills that scored ≤60% as they need retaking
-6. For test matching: Use flexible skill matching - "GraphQL" tests relate to "GraphQL" requirements, "API Integration with GraphQL" relates to both "GraphQL" and "API integration" requirements`
+6. For test matching: Use flexible skill matching - "GraphQL" tests relate to "GraphQL" requirements, "API Integration with GraphQL" relates to both "GraphQL" and "API integration" requirements
+
+IMPORTANT: For suggested_tests, recommend skills that are:
+- Relevant to the candidate's industry/role (e.g., marketing professionals should get marketing tests, not programming tests)
+- Actually testable (focus on practical skills like Digital Marketing, SEO, Content Strategy, Data Analysis, Project Management)
+- Appropriate for the job context (fintech marketing = financial knowledge + marketing skills)
+- Industry-agnostic where appropriate (Communication, Leadership, Analytics apply across sectors)`
         },
         {
           role: 'user',
@@ -85,8 +91,8 @@ Analyze this CV against the job requirements. Return ONLY valid JSON with these 
 - score: number 0-1 (percentage of requirements matched from CV)
 - matched_skills: array of strings (skills/experience from CV that match job requirements - quote specific evidence)
 - missing_skills: array of strings (required skills mentioned in job but not found in CV)
-- suggested_tests: array of strings (skills from missing_skills that could be tested in test hub - exclude skills with test scores >60%, include skills with test scores ≤60% as they need retaking)
-- completed_tests: array of objects with {skill, score, date} for relevant completed tests (include all test attempts regardless of score, use flexible matching - e.g., "GraphQL" test matches "GraphQL" requirements, "API Integration with GraphQL" matches "GraphQL" or "API integration" requirements)
+- suggested_tests: array of strings (skills from missing_skills that could be tested in test hub - exclude skills with test scores >60%, include skills with test scores ≤60% as they need retaking. Focus on industry-appropriate tests: for marketing roles suggest Digital Marketing, SEO, Content Strategy, Analytics; for healthcare suggest Medical Terminology, Patient Care; for education suggest Curriculum Development, etc. Avoid suggesting programming tests for non-technical roles)
+- completed_tests: array of objects with {skill, score, date} for relevant completed tests from the Test Results Available section ONLY (do not include CV certifications or qualifications as completed tests - only include actual test hub results with scores and dates)
 - key_insights: array of strings (specific observations about fit based on CV content)
 
 Be extremely precise - only include skills actually mentioned in the CV, not inferred ones.`
@@ -120,6 +126,7 @@ Be extremely precise - only include skills actually mentioned in the CV, not inf
     } else {
       [finalResult] = await knex('matches').insert({
         job_id: job.id,
+        user_id: userId,
         ...matchData
       }).returning('*');
     }

@@ -67,6 +67,8 @@ const StatsPage = () => {
   const [latestAnalysis, setLatestAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiSkillRecommendations, setAiSkillRecommendations] = useState([]);
+  const [skillRecommendationsLoading, setSkillRecommendationsLoading] = useState(false);
 
   // Navigation handlers
   const handleNavigateToProfile = () => {
@@ -100,6 +102,13 @@ const StatsPage = () => {
   useEffect(() => {
     fetchAnalyticsData();
   }, []);
+
+  // Fetch AI recommendations when profile data is available
+  useEffect(() => {
+    if (profileData && aiSkillRecommendations.length === 0) {
+      fetchAiSkillRecommendations();
+    }
+  }, [profileData]);
 
   const fetchAnalyticsData = async () => {
     try {
@@ -161,12 +170,38 @@ const StatsPage = () => {
     };
   };
 
+  // Fetch AI-powered skill recommendations
+  const fetchAiSkillRecommendations = async () => {
+    if (!profileData || skillRecommendationsLoading) return;
+    
+    try {
+      setSkillRecommendationsLoading(true);
+      const response = await axios.get('/api/profile/skill-recommendations');
+      setAiSkillRecommendations(response.data.recommendations || []);
+    } catch (error) {
+      console.error('Failed to fetch AI skill recommendations:', error);
+      // Fallback to general professional skills
+      setAiSkillRecommendations(['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management']);
+    } finally {
+      setSkillRecommendationsLoading(false);
+    }
+  };
+
+  // Get AI-powered skill recommendations
+  const getIndustrySpecificSkills = () => {
+    if (aiSkillRecommendations.length > 0) {
+      return aiSkillRecommendations;
+    }
+    // Fallback while loading or if AI fails
+    return ['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management'];
+  };
+
   // Get specific skill improvement recommendations
   const getSkillRecommendations = () => {
     if (!testSessions || testSessions.length === 0) {
       return {
         needsImprovement: [],
-        suggested: ['JavaScript', 'Python', 'React', 'SQL', 'Git'],
+        suggested: getIndustrySpecificSkills(),
         incomplete: []
       };
     }
@@ -192,11 +227,14 @@ const StatsPage = () => {
     // Get all completed skill names for filtering - use the actual 'skill' field
     const completedSkillNames = completedTests.map(t => (t.skill || '').toLowerCase().trim());
     
-    // More robust skill matching
-    const suggested = [
-      'JavaScript', 'Python', 'React', 'SQL', 'Git', 
-      'Node.js', 'HTML/CSS', 'MongoDB', 'Express.js', 'REST APIs'
-    ].filter(skill => {
+    // Get industry-specific skills first, then add some universal skills
+    const industrySpecificSkills = getIndustrySpecificSkills();
+    const universalProfessionalSkills = ['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management'];
+    
+    // Combine industry-specific with some universal skills
+    const allAvailableSkills = [...industrySpecificSkills, ...universalProfessionalSkills];
+    
+    const suggested = allAvailableSkills.filter(skill => {
       const skillLower = skill.toLowerCase();
       
       // Check if this skill is already completed
@@ -664,47 +702,119 @@ const StatsPage = () => {
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-testid="analytics-charts-grid">
-          {/* Progress Trend */}
+          {/* Enhanced Progress Tracking */}
           <div className="surface-card p-6">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Progress Over Time</h3>
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">CV Score Progress</h3>
             {analyticsData && analyticsData.analyses_found > 1 ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Oldest Analysis</span>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-neutral-400 to-neutral-500 h-2 rounded-full"
-                        style={{ width: `${analyticsData.oldest_analysis.overall_score}%` }}
-                      ></div>
+              <div className="space-y-6">
+                {/* Progress Timeline Visualization */}
+                <div className="relative">
+                  <div className="flex items-end justify-between h-32 border-b border-neutral-200 dark:border-neutral-700">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="relative">
+                        <div 
+                          className="w-12 bg-gradient-to-t from-neutral-400 to-neutral-500 rounded-t"
+                          style={{ height: `${(analyticsData.oldest_analysis.overall_score / 100) * 80 + 16}px` }}
+                        ></div>
+                        <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                          {analyticsData.oldest_analysis.overall_score}
+                        </span>
+                      </div>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-500 text-center">
+                        First<br/>Analysis
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-neutral-900 dark:text-white w-8">{analyticsData.oldest_analysis.overall_score}</span>
+                    
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="relative">
+                        <div 
+                          className="w-12 bg-gradient-to-t from-purple-500 to-purple-600 rounded-t"
+                          style={{ height: `${(analyticsData.newest_analysis.overall_score / 100) * 80 + 16}px` }}
+                        ></div>
+                        <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-neutral-900 dark:text-white">
+                          {analyticsData.newest_analysis.overall_score}
+                        </span>
+                      </div>
+                      <span className="text-xs text-neutral-500 dark:text-neutral-500 text-center">
+                        Latest<br/>Analysis
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Connection Line */}
+                  <div className="absolute bottom-8 left-6 right-6 h-0.5 bg-gradient-to-r from-neutral-400 to-purple-500 opacity-30"></div>
+                </div>
+
+                {/* Progress Summary */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg">
+                    <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                      {analyticsData.analyses_found}
+                    </div>
+                    <div className="text-xs text-neutral-600 dark:text-neutral-400">Total Analyses</div>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg">
+                    <div className={`text-2xl font-bold ${
+                      analyticsData.improvements.overall_score_change > 0 ? 'text-green-600 dark:text-green-400' :
+                      analyticsData.improvements.overall_score_change < 0 ? 'text-red-600 dark:text-red-400' : 
+                      'text-neutral-600 dark:text-neutral-400'
+                    }`}>
+                      {analyticsData.improvements.overall_score_change > 0 ? '+' : ''}{analyticsData.improvements.overall_score_change}
+                    </div>
+                    <div className="text-xs text-neutral-600 dark:text-neutral-400">Points Change</div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Latest Analysis</span>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
+
+                {/* Achievement Milestones */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg p-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-neutral-900 dark:text-white">Achievement Level:</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      analyticsData.newest_analysis.overall_score >= 90 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                      analyticsData.newest_analysis.overall_score >= 80 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                      analyticsData.newest_analysis.overall_score >= 70 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                      'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300'
+                    }`}>
+                      {analyticsData.newest_analysis.overall_score >= 90 ? 'Excellent (90+)' :
+                       analyticsData.newest_analysis.overall_score >= 80 ? 'Strong (80+)' :
+                       analyticsData.newest_analysis.overall_score >= 70 ? 'Good (70+)' :
+                       'Developing'}
+                    </span>
+                  </div>
+                  <div className="mt-2">
+                    <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2">
                       <div 
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full"
+                        className={`h-2 rounded-full transition-all duration-500 ${
+                          analyticsData.newest_analysis.overall_score >= 90 ? 'bg-gradient-to-r from-green-400 to-green-500' :
+                          analyticsData.newest_analysis.overall_score >= 80 ? 'bg-gradient-to-r from-blue-400 to-blue-500' :
+                          analyticsData.newest_analysis.overall_score >= 70 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' :
+                          'bg-gradient-to-r from-neutral-400 to-neutral-500'
+                        }`}
                         style={{ width: `${analyticsData.newest_analysis.overall_score}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm font-medium text-neutral-900 dark:text-white w-8">{analyticsData.newest_analysis.overall_score}</span>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg">
-                  <div className="text-sm font-medium text-neutral-900 dark:text-white">
-                    {analyticsData.improvements.overall_score_change > 0 ? '📈' : analyticsData.improvements.overall_score_change < 0 ? '📉' : '➡️'}
-                    {analyticsData.improvements.overall_score_change > 0 ? ' Improved by ' : analyticsData.improvements.overall_score_change < 0 ? ' Declined by ' : ' No change: '}
-                    {Math.abs(analyticsData.improvements.overall_score_change)} points
+                    <div className="flex justify-between text-xs text-neutral-500 dark:text-neutral-500 mt-1">
+                      <span>0</span>
+                      <span>70</span>
+                      <span>80</span>
+                      <span>90</span>
+                      <span>100</span>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="text-center text-neutral-500 dark:text-neutral-400 py-8">
-                <DocumentDuplicateIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Run multiple analyses to see progress trends</p>
+                <ChartBarIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <h4 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Build Your Progress History</h4>
+                <p className="text-xs mb-4">Run your first analysis to start tracking CV improvements over time</p>
+                <button
+                  onClick={() => handleRunAnalysis(false)}
+                  disabled={isAnalyzing}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors"
+                >
+                  {isAnalyzing ? 'Analyzing...' : 'Start Tracking Progress'}
+                </button>
               </div>
             )}
           </div>

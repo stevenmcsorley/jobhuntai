@@ -1,5 +1,6 @@
 const Groq = require('groq-sdk');
 const knex = require('knex')(require('../../knexfile').development);
+const skillCategorizationService = require('./skillCategorizationService');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -23,7 +24,7 @@ async function seedProfileFromCv(userId) {
     3.  **Structure the Output:** Create a JSON object with the following keys: "profile", "skills", "work_experiences", "projects", "education".
     4.  **Follow the Schema:**
         *   **profile:** An object with keys: "full_name", "email", "phone", "linkedin_url", "github_url", "summary".
-        *   **skills:** An array of objects, each with "name" and "category". Infer the category (e.g., Frontend, Backend, Database, Tooling) for each skill.
+        *   **skills:** An array of objects, each with "name" (the category will be determined separately based on the user's profession).
         *   **work_experiences:** An array of objects, each with "company", "title", "start_date", "end_date", "location", and an array of "highlights". Each highlight should be an object with a "highlight_text" key.
         *   **projects:** An array of objects, each with "name", "description", and an array of "highlights". Each highlight should be an object with a "highlight_text" key.
         *   **education:** An array of objects, each with "institution", "degree", "field_of_study", "graduation_date".
@@ -61,7 +62,37 @@ async function seedProfileFromCv(userId) {
     jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
 
     console.log('✅ CV parsed successfully by AI.');
-    return JSON.parse(jsonText);
+    const parsedData = JSON.parse(jsonText);
+    
+    // Use AI to categorize skills based on user's profession
+    if (parsedData.skills && parsedData.skills.length > 0) {
+      console.log('🔄 Categorizing skills with AI...');
+      
+      // Determine user's profession from work experience or summary
+      let userProfession = 'Professional';
+      if (parsedData.work_experiences && parsedData.work_experiences.length > 0) {
+        const latestJob = parsedData.work_experiences[0];
+        userProfession = `${latestJob.title} in ${latestJob.company}`;
+      } else if (parsedData.profile && parsedData.profile.summary) {
+        userProfession = parsedData.profile.summary.slice(0, 100); // First 100 chars of summary
+      }
+      
+      // Extract skill names
+      const skillNames = parsedData.skills.map(skill => skill.name);
+      
+      // Get AI-generated categories
+      const skillCategories = await skillCategorizationService.categorizeSkills(skillNames, userProfession);
+      
+      // Update skills with appropriate categories
+      parsedData.skills = parsedData.skills.map(skill => ({
+        name: skill.name,
+        category: skillCategories[skill.name] || 'Professional Skills'
+      }));
+      
+      console.log('✅ Skills categorized successfully.');
+    }
+    
+    return parsedData;
   } catch (error) {
     console.error("Error parsing CV with AI:", error);
     throw new Error("Failed to parse CV with AI.");

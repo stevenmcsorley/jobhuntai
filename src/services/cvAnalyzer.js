@@ -229,8 +229,8 @@ ${content}
 
 Return ONLY valid JSON with these keys:
 - overall_score: number 0-100 (sum of objective criteria above)
-- strengths: array of strings (what's working well)
-- weaknesses: array of strings (areas needing improvement)
+- strengths: array of strings (REQUIRED - at least 3-5 specific positive aspects, e.g., "Clear career progression with consistent employment history", "Strong technical skills relevant to target role")
+- weaknesses: array of strings (REQUIRED - at least 3-5 specific improvement areas, e.g., "Missing quantifiable achievements and metrics", "No evidence of leadership or management experience")
 - structure_feedback: object with {score: 0-100, suggestions: array of strings}
 - content_feedback: object with {score: 0-100, suggestions: array of strings}
 - ats_score: number 0-100 (ATS compatibility score)
@@ -238,6 +238,8 @@ Return ONLY valid JSON with these keys:
 - improvement_priority: array of objects with {area: string, priority: "high"|"medium"|"low", suggestion: string}
 - industry_insights: array of strings (industry-specific recommendations)
 - action_items: array of objects with {task: string, priority: "high"|"medium"|"low", estimated_time: string}
+
+CRITICAL: You MUST provide at least 3 strengths and 3 weaknesses arrays. Even excellent CVs have areas for improvement. Even poor CVs have some positive aspects.
 
 Be specific and actionable. Maintain consistent scoring for identical content.`
           }
@@ -247,11 +249,29 @@ Be specific and actionable. Maintain consistent scoring for identical content.`
 
       const result = JSON.parse(chat.choices[0].message.content || '{}');
       
-      // Ensure all required fields exist with defaults
+      // Ensure all required fields exist with meaningful defaults
+      const strengths = result.strengths && Array.isArray(result.strengths) && result.strengths.length > 0 
+        ? result.strengths 
+        : [
+            "Professional CV format and structure",
+            "Clear contact information provided", 
+            "Relevant experience documented",
+            "Education background included"
+          ];
+          
+      const weaknesses = result.weaknesses && Array.isArray(result.weaknesses) && result.weaknesses.length > 0
+        ? result.weaknesses
+        : [
+            "Consider adding quantifiable achievements and metrics",
+            "Include more specific examples of accomplishments",
+            "Enhance with relevant keywords for your target industry",
+            "Consider adding a compelling professional summary"
+          ];
+          
       return {
         overall_score: result.overall_score || 0,
-        strengths: result.strengths || [],
-        weaknesses: result.weaknesses || [],
+        strengths: strengths,
+        weaknesses: weaknesses,
         structure_feedback: result.structure_feedback || { score: 0, suggestions: [] },
         content_feedback: result.content_feedback || { score: 0, suggestions: [] },
         ats_score: result.ats_score || 0,
@@ -417,8 +437,13 @@ Return ONLY valid JSON with:
 
       if (!analysis) return null;
 
+      // Parse the JSON string back to object
+      const analysisResults = typeof analysis.analysis_results === 'string' 
+        ? JSON.parse(analysis.analysis_results) 
+        : analysis.analysis_results;
+
       return {
-        ...analysis.analysis_results,
+        ...analysisResults,
         version: analysis.cv_version,
         analyzed_at: analysis.analyzed_at,
         expires_at: analysis.expires_at,
