@@ -30,6 +30,105 @@ class CVAnalyzer {
   }
 
   /**
+   * Heuristic pre-pass to detect metrics and leadership signals
+   * @param {string} cv - CV content
+   * @returns {Object} Extracted metrics and leadership spans
+   */
+  heuristicExtract(cv) {
+    const text = cv
+      .replace(/[•●▪–—]/g, "-")
+      .replace(/[""]/g, '"')
+      .replace(/[']/g, "'");
+
+    const metrics = [];
+    const leadership = [];
+
+    // Percentages
+    const pctMatches = [...text.matchAll(/\b~?\s?\d{1,3}(\.\d+)?\s?%/g)];
+    // Currency (GBP/USD/EUR)
+    const currMatches = [...text.matchAll(/(?:£|\$|€)\s?\d{1,3}(?:,\d{3})*(?:\.\d+)?\s?(?:k|m|bn|yr|\/yr)?/gi)];
+    // Time saved / cycle time
+    const timeMatches = [...text.matchAll(/\b(~?\s?\d+(\.\d+)?)\s?(hours?|hrs?|days?|weeks?|months?)\b/gi)];
+    // Counts (teams, stations, users)
+    const countMatches = [...text.matchAll(/\b\d{2,}(?:\+)?\b\s?(?:stations|users|teams?|projects?|contracts?|locations|sites)\b/gi)];
+
+    // Leadership verbs & signals
+    const leadMatches = [...text.matchAll(/\b(led|managed|mentored|supervised|owned|coordinated|directed|head|lead|oversaw)\b/gi)];
+    const crossMatches = [...text.matchAll(/\b(cross-?team|stakeholder|squad|contractors?)\b/gi)];
+
+    // Collect all matches
+    metrics.push(
+      ...pctMatches.map(m => m[0]),
+      ...currMatches.map(m => m[0]),
+      ...timeMatches.map(m => m[0]),
+      ...countMatches.map(m => m[0])
+    );
+
+    leadership.push(
+      ...leadMatches.map(m => m[0]),
+      ...crossMatches.map(m => m[0])
+    );
+
+    // De-duplicate and trim
+    const unique = (arr) => [...new Set(arr.map(s => s.trim()))];
+
+    return {
+      metricsSpans: unique(metrics),
+      leadershipSpans: unique(leadership)
+    };
+  }
+
+  /**
+   * Generate evidence-based weaknesses to avoid contradictions
+   * @param {Object} analysis - AI analysis results
+   * @param {Object} evidence - Extracted evidence
+   * @returns {Array} Filtered weaknesses based on evidence
+   */
+  getEvidenceBasedWeaknesses(analysis, evidence) {
+    const rawWeaknesses = analysis.weaknesses || [];
+    const strengths = analysis.strengths || [];
+    
+    // Filter out contradictory weaknesses
+    const filteredWeaknesses = rawWeaknesses.filter(weakness => {
+      // Check for contradictions with strengths
+      const hasQuantifiableAchievements = strengths.some(s => 
+        /abundant.*achievement|quantifiable|metrics|evidence/i.test(s)
+      );
+      const hasLeadershipEvidence = strengths.some(s => 
+        /leadership|led|managed|team/i.test(s)
+      );
+      
+      // Remove contradictory statements
+      if (hasQuantifiableAchievements && /limited.*achievement|missing.*metrics/i.test(weakness)) {
+        return false;
+      }
+      if (hasLeadershipEvidence && /no.*leadership|limited.*leadership/i.test(weakness)) {
+        return false;
+      }
+      
+      return true;
+    });
+    
+    // Add evidence-based weaknesses only if evidence supports them
+    const evidenceBasedWeaknesses = [];
+    const metricsCount = evidence.quantifiable_achievements?.length || 0;
+    const leadershipCount = evidence.leadership_indicators?.length || 0;
+    
+    if (metricsCount < 3) {
+      evidenceBasedWeaknesses.push("Could benefit from more specific metrics (add 1-2 per recent role)");
+    }
+    
+    // Return filtered weaknesses or fallback
+    const finalWeaknesses = filteredWeaknesses.length > 0 
+      ? filteredWeaknesses 
+      : evidenceBasedWeaknesses.length > 0 
+        ? evidenceBasedWeaknesses
+        : ["Consider adding more industry-specific keywords", "Could enhance professional summary"];
+    
+    return finalWeaknesses;
+  }
+
+  /**
    * Generate cache key for analysis
    * @param {number} userId - User ID
    * @param {string} type - Analysis type
@@ -189,12 +288,15 @@ class CVAnalyzer {
   }
 
   /**
-   * Perform AI-powered analysis of CV content
+   * Perform AI-powered analysis of CV content with evidence-first approach
    * @param {string} content - CV content
    * @returns {Promise<Object>} AI analysis results
    */
   async performAiAnalysis(content) {
     try {
+      // Use heuristic pre-pass to identify evidence
+      const heuristicEvidence = this.heuristicExtract(content);
+      
       // Create a content-based seed for more consistent results
       const contentHash = this.generateContentHash(content);
       const numericSeed = parseInt(contentHash.slice(0, 8), 16) % 1000;
@@ -204,44 +306,72 @@ class CVAnalyzer {
         messages: [
           {
             role: 'system',
-            content: `You are an expert CV/resume analysis agent. Analyze the provided CV and provide comprehensive improvement suggestions.
+            content: `You are an expert CV/resume analysis agent using evidence-first methodology. You MUST extract evidence before making any judgments.
 
-IMPORTANT: For consistency, base your scoring on these objective criteria:
-1. Overall Structure & Formatting (20 points max)
-2. Content Quality & Impact (25 points max)
-3. Professional Summary/Objective (15 points max)
-4. Work Experience Section (20 points max)
-5. Skills Section (10 points max)
-6. Education Section (5 points max)
-7. ATS Optimization (5 points max)
+EVIDENCE-FIRST APPROACH:
+1. EXTRACT: Find all quantifiable achievements, leadership indicators, and skills
+2. SCORE: Base ratings on extracted evidence only
+3. SUMMARIZE: Provide feedback based on documented findings
 
-Use the analysis seed: ${numericSeed} to ensure consistent evaluation of similar content.
+CRITICAL: Do NOT make assumptions. Only reference evidence you can extract from the CV text.
 
-Provide specific, actionable feedback with examples where possible. Be constructive and professional.`
+Analysis seed: ${numericSeed}`
           },
           {
             role: 'user',
-            content: `Please analyze this CV and provide detailed improvement suggestions (Analysis ID: ${contentHash.slice(0, 8)}):
+            content: `TASK: Analyze this CV using structured evidence extraction.
 
+PRE-EXTRACTED EVIDENCE (for verification):
+- Metrics found: ${heuristicEvidence.metricsSpans.join(', ') || 'None detected'}
+- Leadership indicators: ${heuristicEvidence.leadershipSpans.join(', ') || 'None detected'}
+
+CV CONTENT:
 ---
 ${content}
 ---
 
-Return ONLY valid JSON with these keys:
-- overall_score: number 0-100 (sum of objective criteria above)
-- strengths: array of strings (REQUIRED - at least 3-5 specific positive aspects, e.g., "Clear career progression with consistent employment history", "Strong technical skills relevant to target role")
-- weaknesses: array of strings (REQUIRED - at least 3-5 specific improvement areas, e.g., "Missing quantifiable achievements and metrics", "No evidence of leadership or management experience")
-- structure_feedback: object with {score: 0-100, suggestions: array of strings}
-- content_feedback: object with {score: 0-100, suggestions: array of strings}
-- ats_score: number 0-100 (ATS compatibility score)
-- missing_sections: array of strings (important sections that are missing)
-- improvement_priority: array of objects with {area: string, priority: "high"|"medium"|"low", suggestion: string}
-- industry_insights: array of strings (industry-specific recommendations)
-- action_items: array of objects with {task: string, priority: "high"|"medium"|"low", estimated_time: string}
+Return ONLY valid JSON with this exact structure:
 
-CRITICAL: You MUST provide at least 3 strengths and 3 weaknesses arrays. Even excellent CVs have areas for improvement. Even poor CVs have some positive aspects.
+{
+  "evidence": {
+    "quantifiable_achievements": ["list all percentages, dollar amounts, time savings, team sizes, project counts found"],
+    "leadership_indicators": ["list all instances of led, managed, supervised, coordinated, owned, directed"],
+    "technical_skills": ["list all technical skills, tools, technologies mentioned"],
+    "experience_years": ["extract years of experience or employment durations"],
+    "education_credentials": ["degrees, certifications, institutions found"],
+    "industry_keywords": ["domain-specific terms and jargon found"]
+  },
+  "scoring": {
+    "metrics_score": 0-25,
+    "leadership_score": 0-25, 
+    "structure_score": 0-20,
+    "content_score": 0-20,
+    "ats_score": 0-10,
+    "total_score": 0-100
+  },
+  "analysis": {
+    "strengths": ["based on extracted evidence only"],
+    "weaknesses": ["based on gaps in extracted evidence"],
+    "missing_sections": ["sections not found in CV"],
+    "improvement_priority": [{"area": "string", "priority": "high|medium|low", "suggestion": "string", "evidence_gap": "what specific evidence is missing"}],
+    "action_items": [{"task": "string", "priority": "high|medium|low", "estimated_time": "string"}]
+  }
+}
 
-Be specific and actionable. Maintain consistent scoring for identical content.`
+SCORING RULES:
+- metrics_score: 5 points per quantifiable achievement (max 25)
+- leadership_score: 5 points per leadership indicator (max 25)  
+- structure_score: Based on CV formatting and organization (max 20)
+- content_score: Based on depth and relevance of content (max 20)
+- ats_score: Based on keyword usage and format compatibility (max 10)
+
+EVIDENCE-BASED WEAKNESS DETECTION:
+- Only flag "Limited information on roles" if work experience has fewer than 3 bullet points per role
+- Only flag "Missing quantifiable achievements" if no percentages, currency, or numbers found
+- Only flag "No leadership experience" if no leadership verbs detected
+- Base ALL scoring and feedback on extracted evidence only
+
+IMPORTANT: Base ALL scoring on evidence you extract. If no metrics are found, metrics_score = 0. If no leadership terms found, leadership_score = 0.`
           }
         ],
         response_format: { type: 'json_object' }
@@ -249,36 +379,58 @@ Be specific and actionable. Maintain consistent scoring for identical content.`
 
       const result = JSON.parse(chat.choices[0].message.content || '{}');
       
-      // Ensure all required fields exist with meaningful defaults
-      const strengths = result.strengths && Array.isArray(result.strengths) && result.strengths.length > 0 
-        ? result.strengths 
-        : [
-            "Professional CV format and structure",
-            "Clear contact information provided", 
-            "Relevant experience documented",
-            "Education background included"
-          ];
-          
-      const weaknesses = result.weaknesses && Array.isArray(result.weaknesses) && result.weaknesses.length > 0
-        ? result.weaknesses
-        : [
-            "Consider adding quantifiable achievements and metrics",
-            "Include more specific examples of accomplishments",
-            "Enhance with relevant keywords for your target industry",
-            "Consider adding a compelling professional summary"
-          ];
-          
+      // Validate and structure the response
+      const evidence = result.evidence || {};
+      const scoring = result.scoring || {};
+      const analysis = result.analysis || {};
+      
+      // Normalize scores for UI display
+      const structure20 = scoring.structure_score || 0;
+      const content20 = scoring.content_score || 0;
+      const ats10 = scoring.ats_score || 0;
+      
+      // Convert to 0-100 scale for display
+      const structure100 = Math.round((structure20 / 20) * 100);
+      const content100 = Math.round((content20 / 20) * 100);
+      const ats100 = Math.round(ats10 * 10);
+      
+      // Ensure required fields exist
       return {
-        overall_score: result.overall_score || 0,
-        strengths: strengths,
-        weaknesses: weaknesses,
-        structure_feedback: result.structure_feedback || { score: 0, suggestions: [] },
-        content_feedback: result.content_feedback || { score: 0, suggestions: [] },
-        ats_score: result.ats_score || 0,
-        missing_sections: result.missing_sections || [],
-        improvement_priority: result.improvement_priority || [],
-        industry_insights: result.industry_insights || [],
-        action_items: result.action_items || []
+        overall_score: scoring.total_score || 0,
+        ats_score: ats100,
+        
+        // Evidence-based strengths and weaknesses
+        strengths: analysis.strengths && analysis.strengths.length > 0 
+          ? analysis.strengths 
+          : ["CV structure is present", "Contact information provided"],
+          
+        weaknesses: this.getEvidenceBasedWeaknesses(analysis, evidence),
+        
+        // Detailed scoring breakdown (normalized for UI)
+        structure_feedback: { 
+          score: structure100, 
+          suggestions: [`Structure: ${structure20}/20 points (${structure100}% of maximum)`]
+        },
+        content_feedback: { 
+          score: content100, 
+          suggestions: [`Content: ${content20}/20 points (${content100}% of maximum)`]
+        },
+        
+        // Evidence extraction results
+        extracted_evidence: {
+          quantifiable_achievements: evidence.quantifiable_achievements || [],
+          leadership_indicators: evidence.leadership_indicators || [],
+          technical_skills: evidence.technical_skills || [],
+          experience_years: evidence.experience_years || [],
+          education_credentials: evidence.education_credentials || [],
+          industry_keywords: evidence.industry_keywords || []
+        },
+        
+        // Traditional fields
+        missing_sections: analysis.missing_sections || [],
+        improvement_priority: analysis.improvement_priority || [],
+        industry_insights: [`Based on ${evidence.industry_keywords?.length || 0} industry keywords found`],
+        action_items: analysis.action_items || []
       };
     } catch (error) {
       console.error('AI Analysis error:', error);

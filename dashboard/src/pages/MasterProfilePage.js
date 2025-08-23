@@ -37,8 +37,30 @@ const MasterProfilePage = () => {
     fetchProfile();
   }, []);
 
-  const handleSave = (updatedData) => {
-    fetchProfile();
+  const handleSave = async (updatedData) => {
+    try {
+      // Refresh profile data
+      await fetchProfile();
+      
+      // Auto-regenerate CV from updated profile data
+      if (!isProfileEmpty) {
+        console.log('🔄 Auto-regenerating CV after profile update...');
+        try {
+          const response = await axios.post('/api/profile/regenerate-cv');
+          console.log('✅ CV automatically regenerated:', response.data.cv.version);
+          toast.success('Profile saved and CV updated!', { autoClose: 2000 });
+        } catch (error) {
+          console.error('❌ Auto-regeneration failed:', error);
+          // Don't show error toast - profile save was successful
+          toast.success('Profile saved! (CV regeneration failed - you can manually regenerate it)', { autoClose: 3000 });
+        }
+      } else {
+        toast.success('Profile saved!');
+      }
+    } catch (error) {
+      console.error('Error in handleSave:', error);
+      toast.error('Failed to save profile.');
+    }
   };
 
 

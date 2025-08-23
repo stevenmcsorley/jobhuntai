@@ -20,18 +20,26 @@ async function seedProfileFromCv(userId) {
 
     **THE TASK:**
     1.  **Read the CV Text:** Analyze the provided CV.
-    2.  **Extract Key Information:** Identify all the distinct sections: summary, skills, work experience, projects, and education.
+    2.  **Extract Key Information:** Identify all sections including: summary, skills, work experience, projects, education, leadership, achievements, certifications, awards, etc.
     3.  **Structure the Output:** Create a JSON object with the following keys: "profile", "skills", "work_experiences", "projects", "education".
     4.  **Follow the Schema:**
         *   **profile:** An object with keys: "full_name", "email", "phone", "linkedin_url", "github_url", "summary".
         *   **skills:** An array of objects, each with "name" (the category will be determined separately based on the user's profession).
-        *   **work_experiences:** An array of objects, each with "company", "title", "start_date", "end_date", "location", and an array of "highlights". Each highlight should be an object with a "highlight_text" key.
+        *   **work_experiences:** An array of objects, each with "company", "title", "start_date", "end_date", "location", and an array of "highlights". Each highlight should be an object with a "highlight_text" key. IMPORTANT: If you find a separate LEADERSHIP, ACHIEVEMENTS, IMPACT, SELECTED PROJECTS, or similar sections, incorporate these details into the work experience highlights of the most relevant job position.
         *   **projects:** An array of objects, each with "name", "description", and an array of "highlights". Each highlight should be an object with a "highlight_text" key.
         *   **education:** An array of objects, each with "institution", "degree", "field_of_study", "graduation_date".
 
+    **SPECIAL INSTRUCTIONS FOR NON-STANDARD SECTIONS:**
+    * **LEADERSHIP Section:** Add leadership bullet points to the most relevant work experience highlights
+    * **ACHIEVEMENTS/IMPACT Section:** Add achievement details to appropriate work experience highlights  
+    * **SELECTED PROJECTS Section:** Add as separate projects AND relevant highlights to work experiences
+    * **CERTIFICATIONS/AWARDS:** Include in the summary or add to relevant work experience highlights
+    * **CORE SKILLS/TOOLS Section:** Extract all individual skills, tools, and technologies mentioned
+
     **IMPORTANT:**
     *   The output MUST be a single, valid JSON object. Do not include any text or markdown formatting before or after the JSON.
-    *   Be precise. Extract the data as accurately as possible.
+    *   Be precise. Extract ALL data, especially leadership, achievements, and detailed metrics.
+    *   Don't lose any quantified results or leadership experiences.
 
     **CV TEXT TO PARSE:**
     ---
