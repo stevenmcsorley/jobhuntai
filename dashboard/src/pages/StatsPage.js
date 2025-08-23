@@ -271,7 +271,7 @@ const StatsPage = () => {
 
   // Get specific CV improvement recommendations
   const getCvRecommendations = () => {
-    if (!latestAnalysis?.analysis) {
+    if (!latestAnalysis || !latestAnalysis.weaknesses) {
       return {
         criticalIssues: ['Add professional summary', 'Include work experience', 'List relevant skills'],
         suggestions: ['Use action verbs', 'Quantify achievements', 'Customize for each job'],
@@ -279,11 +279,11 @@ const StatsPage = () => {
       };
     }
 
-    const analysis = latestAnalysis.analysis;
+    // latestAnalysis has the data directly at top level, not nested under 'analysis'
     return {
-      criticalIssues: analysis.weaknesses?.slice(0, 3) || [],
-      suggestions: analysis.suggestions?.slice(0, 3) || [],
-      atsIssues: analysis.ats_feedback?.issues?.slice(0, 3) || []
+      criticalIssues: latestAnalysis.weaknesses?.slice(0, 3) || [],
+      suggestions: latestAnalysis.suggestions?.slice(0, 3) || [],
+      atsIssues: latestAnalysis.ats_feedback?.issues?.slice(0, 3) || []
     };
   };
 

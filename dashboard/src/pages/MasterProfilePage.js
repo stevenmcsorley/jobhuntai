@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { SparklesIcon, ArrowDownTrayIcon, CloudArrowUpIcon, ChartBarIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, ArrowDownTrayIcon, CloudArrowUpIcon, ChartBarIcon, DocumentTextIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import ProfileSection from '../components/ProfileSection';
 import SkillsSection from '../components/SkillsSection';
 import WorkExperienceSection from '../components/WorkExperienceSection';
@@ -18,6 +18,7 @@ const MasterProfilePage = () => {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isRegeneratingCV, setIsRegeneratingCV] = useState(false);
   const fileInputRef = useRef(null);
 
   const fetchProfile = async () => {
@@ -40,20 +41,19 @@ const MasterProfilePage = () => {
     fetchProfile();
   };
 
-  const handleSeedProfile = async () => {
-    const confirmMessage = isProfileEmpty 
-      ? 'Are you sure you want to automatically populate your profile from your CV? This will create your initial profile data.'
-      : 'Are you sure you want to re-import from your CV? This will overwrite your existing profile data with the latest CV content.';
-    
-    if (window.confirm(confirmMessage)) {
-      toast.info('Parsing your CV with AI... This may take a moment.');
+
+  const handleRegenerateCV = async () => {
+    if (window.confirm('Are you sure you want to regenerate your CV from the current master profile data? This will create a new CV version with the latest profile information.')) {
+      setIsRegeneratingCV(true);
       try {
-        await axios.post('/api/profile/seed');
-        toast.success('Profile successfully updated from your CV!');
-        fetchProfile(); // Refresh the data
+        toast.info('Regenerating CV from master profile data...');
+        const response = await axios.post('/api/profile/regenerate-cv');
+        toast.success(`CV successfully regenerated! Version ${response.data.cv.version} created with ${response.data.profileAnalyzed.skills_count} skills, ${response.data.profileAnalyzed.experience_count} work experiences, and ${response.data.profileAnalyzed.education_count} education entries.`);
       } catch (error) {
-        toast.error('Failed to update profile from CV.');
-        console.error('Error seeding profile:', error);
+        toast.error(error.response?.data?.error || 'Failed to regenerate CV from profile.');
+        console.error('Error regenerating CV:', error);
+      } finally {
+        setIsRegeneratingCV(false);
       }
     }
   };
@@ -150,7 +150,15 @@ const MasterProfilePage = () => {
       
       // Automatically populate profile from uploaded CV
       if (window.confirm('Would you like to automatically populate your Master Profile with the uploaded CV content?')) {
-        await handleSeedProfile();
+        try {
+          toast.info('Parsing your CV with AI... This may take a moment.');
+          await axios.post('/api/profile/seed');
+          toast.success('Profile successfully updated from your CV!');
+          fetchProfile(); // Refresh the data
+        } catch (error) {
+          toast.error('Failed to update profile from CV.');
+          console.error('Error seeding profile:', error);
+        }
       }
     } catch (error) {
       toast.error('Failed to upload and process CV.');
@@ -242,13 +250,28 @@ const MasterProfilePage = () => {
                 <CloudArrowUpIcon className="w-5 h-5" />
                 <span>Upload CV</span>
               </button>
-              <button 
-                onClick={handleSeedProfile} 
-                className={`${isProfileEmpty ? 'btn-success' : 'btn-primary'} flex items-center space-x-2`}
-                data-testid="import-cv-button"
+              <button
+                onClick={handleRegenerateCV}
+                disabled={isProfileEmpty || isRegeneratingCV}
+                className={`flex items-center space-x-2 ${
+                  isProfileEmpty || isRegeneratingCV
+                    ? 'btn-secondary opacity-50 cursor-not-allowed' 
+                    : 'btn-primary bg-green-600 hover:bg-green-700'
+                }`}
+                data-testid="regenerate-cv-button"
+                title="Generate new CV from current master profile data"
               >
-                <SparklesIcon className="w-5 h-5" />
-                <span>{isProfileEmpty ? 'Import from CV' : 'Re-import from CV'}</span>
+                {isRegeneratingCV ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Regenerating...</span>
+                  </>
+                ) : (
+                  <>
+                    <ArrowPathIcon className="w-5 h-5" />
+                    <span>Regenerate CV</span>
+                  </>
+                )}
               </button>
               <button
                 onClick={handleAnalyzeProfile}

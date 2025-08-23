@@ -1,7 +1,9 @@
 const Groq = require('groq-sdk');
+const knex = require('knex')(require('../../knexfile').development);
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = 'llama3-8b-8192';
+const CACHE_DURATION_DAYS = 7; // Recommendations expire after 7 days
 
 if (!GROQ_API_KEY) {
   throw new Error('Missing GROQ_API_KEY in your .env');
@@ -10,13 +12,25 @@ if (!GROQ_API_KEY) {
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 /**
- * Generate AI-powered skill recommendations based on user profile
+ * Get skill recommendations for a user (cached or generate new)
+ * @param {number} userId - User ID
  * @param {Object} profileData - User's profile data including skills, experience, education
+ * @param {boolean} forceRefresh - Force regeneration even if cache exists
  * @returns {Promise<Array<string>>} Array of recommended skills to test
  */
-async function generateSkillRecommendations(profileData) {
+async function generateSkillRecommendations(profileData, userId = null, forceRefresh = false) {
   try {
-    // Extract relevant profile information
+    // If userId is provided, check for cached recommendations first
+    if (userId && !forceRefresh) {
+      const cached = await getCachedRecommendations(userId);
+      if (cached) {
+        console.log('🎯 Using cached skill recommendations');
+        return cached;
+      }
+    }
+
+    // Generate new recommendations
+    console.log('🤖 Generating new skill recommendations...');
     const profileSummary = buildProfileSummary(profileData);
     
     const chat = await groq.chat.completions.create({
@@ -61,22 +75,42 @@ Return ONLY valid JSON in this exact format: {"skills": ["skill1", "skill2", "sk
 
     const result = JSON.parse(chat.choices[0].message.content || '{"skills": []}');
     
+    let recommendations = [];
+    
     // Handle different possible response formats
     if (Array.isArray(result)) {
-      return result.slice(0, 8); // Limit to 8 skills
+      recommendations = result.slice(0, 8); // Limit to 8 skills
     } else if (result.skills && Array.isArray(result.skills)) {
-      return result.skills.slice(0, 8);
+      recommendations = result.skills.slice(0, 8);
     } else if (result.recommendations && Array.isArray(result.recommendations)) {
-      return result.recommendations.slice(0, 8);
+      recommendations = result.recommendations.slice(0, 8);
     } else {
-      // Fallback to general professional skills
-      return ['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management'];
+      // Fallback to personalized professional skills based on profile
+      recommendations = getPersonalizedFallbackSkills(profileData);
     }
+
+    // Save to database if userId provided
+    if (userId && recommendations.length > 0) {
+      await saveCachedRecommendations(userId, recommendations, profileSummary);
+      console.log('✅ Skill recommendations saved to database');
+    }
+
+    return recommendations;
 
   } catch (error) {
     console.error('Error generating skill recommendations:', error);
-    // Fallback to general professional skills on error
-    return ['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management'];
+    
+    // Try to get cached recommendations as fallback
+    if (userId) {
+      const cached = await getCachedRecommendations(userId, true); // Get even expired cache
+      if (cached) {
+        console.log('⚠️ Using expired cached recommendations due to error');
+        return cached;
+      }
+    }
+    
+    // Final fallback
+    return getPersonalizedFallbackSkills(profileData);
   }
 }
 
@@ -141,6 +175,108 @@ function buildProfileSummary(profileData) {
   return summary.trim();
 }
 
+/**
+ * Get cached skill recommendations from database
+ * @param {number} userId - User ID
+ * @param {boolean} includeExpired - Include expired recommendations
+ * @returns {Promise<Array<string>|null>} Cached recommendations or null
+ */
+async function getCachedRecommendations(userId, includeExpired = false) {
+  try {
+    const query = knex('skill_recommendations')
+      .where({ user_id: userId, is_active: true })
+      .orderBy('generated_at', 'desc')
+      .first();
+    
+    if (!includeExpired) {
+      query.where('expires_at', '>', new Date());
+    }
+    
+    const cached = await query;
+    
+    if (cached && cached.recommendations) {
+      const recommendations = JSON.parse(cached.recommendations);
+      return Array.isArray(recommendations) ? recommendations : null;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching cached recommendations:', error);
+    return null;
+  }
+}
+
+/**
+ * Save skill recommendations to database cache
+ * @param {number} userId - User ID
+ * @param {Array<string>} recommendations - Skill recommendations
+ * @param {string} profileSummary - Profile summary used for generation
+ */
+async function saveCachedRecommendations(userId, recommendations, profileSummary) {
+  try {
+    // Deactivate existing recommendations
+    await knex('skill_recommendations')
+      .where({ user_id: userId })
+      .update({ is_active: false });
+    
+    // Calculate expiry date
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + CACHE_DURATION_DAYS);
+    
+    // Insert new recommendations
+    await knex('skill_recommendations').insert({
+      user_id: userId,
+      recommendations: JSON.stringify(recommendations),
+      profile_summary: profileSummary,
+      expires_at: expiresAt,
+      is_active: true
+    });
+    
+  } catch (error) {
+    console.error('Error saving cached recommendations:', error);
+    // Don't throw - this is not critical
+  }
+}
+
+/**
+ * Generate personalized fallback skills based on profile data
+ * @param {Object} profileData - User's profile data
+ * @returns {Array<string>} Personalized skill recommendations
+ */
+function getPersonalizedFallbackSkills(profileData) {
+  // Analyze profile to determine industry/role
+  const profileText = buildProfileSummary(profileData).toLowerCase();
+  
+  // Industry-specific skill mappings
+  const industrySkills = {
+    marketing: ['Digital Marketing', 'SEO/SEM', 'Google Analytics', 'Content Strategy', 'Social Media Marketing'],
+    technology: ['JavaScript', 'Python', 'Cloud Computing', 'Database Management', 'Cybersecurity'],
+    finance: ['Financial Analysis', 'Excel Advanced', 'Risk Management', 'QuickBooks', 'Investment Analysis'],
+    healthcare: ['Medical Terminology', 'HIPAA Compliance', 'Patient Care', 'Clinical Documentation', 'Electronic Health Records'],
+    education: ['Curriculum Development', 'Classroom Management', 'Educational Technology', 'Student Assessment', 'Learning Management Systems'],
+    sales: ['CRM Systems', 'Sales Strategy', 'Negotiation', 'Lead Generation', 'Customer Relationship Management'],
+    legal: ['Legal Research', 'Contract Analysis', 'Regulatory Compliance', 'Case Management', 'Legal Writing'],
+    travel: ['Customer Service', 'Travel Planning', 'Booking Systems', 'Cultural Awareness', 'Destination Knowledge']
+  };
+  
+  // Try to match industry keywords
+  for (const [industry, skills] of Object.entries(industrySkills)) {
+    if (profileText.includes(industry) || 
+        profileText.includes(industry.slice(0, -1)) || // Remove 's' for plural
+        (industry === 'technology' && (profileText.includes('tech') || profileText.includes('software') || profileText.includes('developer'))) ||
+        (industry === 'travel' && (profileText.includes('agent') || profileText.includes('tourism'))) ||
+        (industry === 'healthcare' && (profileText.includes('medical') || profileText.includes('nurse') || profileText.includes('doctor'))) ||
+        (industry === 'education' && (profileText.includes('teacher') || profileText.includes('instructor') || profileText.includes('academic')))) {
+      return [...skills].slice(0, 5);
+    }
+  }
+  
+  // Universal professional skills as ultimate fallback
+  return ['Communication', 'Leadership', 'Project Management', 'Data Analysis', 'Time Management'];
+}
+
 module.exports = {
-  generateSkillRecommendations
+  generateSkillRecommendations,
+  getCachedRecommendations,
+  getPersonalizedFallbackSkills
 };

@@ -38,6 +38,8 @@ const getFullProfile = async (userId) => {
 const { seedProfileFromCv } = require('../../services/profileSeeder');
 const pdfExporter = require('../../services/pdfExporter');
 const skillRecommendationService = require('../../services/skillRecommendationService');
+const { generateCvFromProfile } = require('../../services/cvGenerator');
+const cvVersioning = require('../../services/cvVersioning');
 
 // GET /api/profile - Fetch all master profile data
 router.get('/', async (req, res) => {
@@ -469,15 +471,21 @@ router.post('/export/html', async (req, res) => {
   }
 });
 
-// GET /api/profile/skill-recommendations - Get AI-powered skill recommendations
+// GET /api/profile/skill-recommendations - Get AI-powered skill recommendations (cached or fresh)
 router.get('/skill-recommendations', async (req, res) => {
   try {
+    const forceRefresh = req.query.refresh === 'true';
     const profileData = await getFullProfile(req.user.id);
-    const recommendations = await skillRecommendationService.generateSkillRecommendations(profileData);
+    const recommendations = await skillRecommendationService.generateSkillRecommendations(
+      profileData, 
+      req.user.id, 
+      forceRefresh
+    );
     
     res.json({
       recommendations,
       generated_at: new Date().toISOString(),
+      cached: !forceRefresh, // Indicate if this might be from cache
       profile_analyzed: {
         skills_count: profileData.skills?.length || 0,
         experience_count: profileData.work_experiences?.length || 0,
@@ -488,6 +496,68 @@ router.get('/skill-recommendations', async (req, res) => {
     console.error('Error generating skill recommendations:', err);
     res.status(500).json({ 
       error: 'Failed to generate skill recommendations.', 
+      details: err.message 
+    });
+  }
+});
+
+// POST /api/profile/regenerate-cv - Regenerate CV from current master profile data
+router.post('/regenerate-cv', async (req, res) => {
+  try {
+    console.log('🔄 Regenerate CV request from user:', req.user?.id);
+    
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'User authentication required' });
+    }
+    
+    // Get current master profile data
+    const profileData = await getFullProfile(req.user.id);
+    console.log('📋 Profile data fetched:', {
+      skills: profileData.skills?.length || 0,
+      experiences: profileData.work_experiences?.length || 0,
+      education: profileData.education?.length || 0,
+      projects: profileData.projects?.length || 0
+    });
+    
+    // Generate CV content from profile
+    const cvContent = generateCvFromProfile(profileData);
+    console.log('📄 Generated CV content length:', cvContent?.length || 0);
+    
+    if (!cvContent || cvContent.trim().length === 0) {
+      return res.status(400).json({ 
+        error: 'Cannot generate CV from empty profile. Please add profile information first.' 
+      });
+    }
+    
+    // Save as new CV version
+    const newCv = await cvVersioning.updateCvWithVersion(
+      req.user.id, 
+      cvContent, 
+      'master_profile',
+      'Regenerated from updated master profile data'
+    );
+    console.log('✅ New CV version created:', newCv.version);
+    
+    res.json({
+      message: 'CV successfully regenerated from master profile',
+      cv: {
+        id: newCv.id,
+        version: newCv.version,
+        contentLength: cvContent.length,
+        changeSummary: 'Regenerated from updated master profile data'
+      },
+      profileAnalyzed: {
+        skills_count: profileData.skills?.length || 0,
+        experience_count: profileData.work_experiences?.length || 0,
+        education_count: profileData.education?.length || 0,
+        projects_count: profileData.projects?.length || 0
+      }
+    });
+    
+  } catch (err) {
+    console.error('❌ Error regenerating CV:', err);
+    res.status(500).json({ 
+      error: 'Failed to regenerate CV from profile.', 
       details: err.message 
     });
   }
