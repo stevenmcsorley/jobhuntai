@@ -10,7 +10,6 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import TestHubPage from './pages/TestHubPage';
 import StatsPage from './pages/StatsPage';
-import CVEditorPage from './pages/CVEditorPage';
 import InterviewsPage from './pages/InterviewsPage';
 import PreferencesPage from './pages/PreferencesPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
@@ -162,7 +161,6 @@ function AppContent() {
             <Route path="/preferences" element={<PreferencesPage />} />
             <Route path="/test" element={<TestHubPage />} />
             <Route path="/stats" element={<StatsPage stats={stats} />} />
-            <Route path="/cv-editor" element={<CVEditorPage />} />
             <Route path="/interviews" element={<InterviewsPage interviews={interviews} onRefresh={fetchData} />} />
             <Route path="/market-fit" element={<MarketFitPage />} />
             <Route path="/bulk-add" element={<BulkAddPage fetchData={fetchData} />} />

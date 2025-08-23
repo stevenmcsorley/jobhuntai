@@ -36,6 +36,7 @@ const getFullProfile = async (userId) => {
 };
 
 const { seedProfileFromCv } = require('../../services/profileSeeder');
+const pdfExporter = require('../../services/pdfExporter');
 
 // GET /api/profile - Fetch all master profile data
 router.get('/', async (req, res) => {
@@ -378,6 +379,94 @@ ${edu.degree} in ${edu.field_of_study} from ${edu.institution}
   }
 });
 
+// POST /api/profile/export/pdf - Export master profile as PDF
+router.post('/export/pdf', async (req, res) => {
+  try {
+    const { template = 'professional', filename } = req.body;
+    
+    // Get full profile data
+    const profileData = await getFullProfile(req.user.id);
+    
+    // Check if profile has sufficient data
+    if (!profileData.profile && (!profileData.work_experiences || profileData.work_experiences.length === 0)) {
+      return res.status(400).json({ error: 'Profile data is insufficient for export. Please add more information.' });
+    }
+
+    // Generate PDF from structured profile
+    const pdfBuffer = await pdfExporter.exportFromProfile(profileData, template);
+    
+    // Set response headers
+    const exportFilename = filename || `CV_${profileData.profile?.full_name || 'Profile'}_MasterProfile.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${exportFilename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error('Profile PDF export error:', err);
+    res.status(500).json({ error: 'Failed to export profile as PDF.', details: err.message });
+  }
+});
+
+// POST /api/profile/export/docx - Export master profile as DOCX
+router.post('/export/docx', async (req, res) => {
+  try {
+    const { template = 'professional', filename } = req.body;
+    
+    // Get full profile data
+    const profileData = await getFullProfile(req.user.id);
+    
+    // Check if profile has sufficient data
+    if (!profileData.profile && (!profileData.work_experiences || profileData.work_experiences.length === 0)) {
+      return res.status(400).json({ error: 'Profile data is insufficient for export. Please add more information.' });
+    }
+
+    // Convert profile to CV structure and export as DOCX
+    const structuredCv = pdfExporter.profileToCv(profileData);
+    const docxBuffer = await pdfExporter.exportAsDocx(structuredCv, template);
+    
+    // Set response headers
+    const exportFilename = filename || `CV_${profileData.profile?.full_name || 'Profile'}_MasterProfile.docx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${exportFilename}"`);
+    res.setHeader('Content-Length', docxBuffer.length);
+    
+    res.send(docxBuffer);
+  } catch (err) {
+    console.error('Profile DOCX export error:', err);
+    res.status(500).json({ error: 'Failed to export profile as DOCX.', details: err.message });
+  }
+});
+
+// POST /api/profile/export/html - Export master profile as HTML
+router.post('/export/html', async (req, res) => {
+  try {
+    const { template = 'professional', filename } = req.body;
+    
+    // Get full profile data
+    const profileData = await getFullProfile(req.user.id);
+    
+    // Check if profile has sufficient data
+    if (!profileData.profile && (!profileData.work_experiences || profileData.work_experiences.length === 0)) {
+      return res.status(400).json({ error: 'Profile data is insufficient for export. Please add more information.' });
+    }
+
+    // Convert profile to CV structure and export as HTML
+    const structuredCv = pdfExporter.profileToCv(profileData);
+    const htmlContent = pdfExporter.exportAsHtml(structuredCv, template);
+    
+    // Set response headers
+    const exportFilename = filename || `CV_${profileData.profile?.full_name || 'Profile'}_MasterProfile.html`;
+    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Disposition', `attachment; filename="${exportFilename}"`);
+    res.setHeader('Content-Length', Buffer.byteLength(htmlContent, 'utf8'));
+    
+    res.send(htmlContent);
+  } catch (err) {
+    console.error('Profile HTML export error:', err);
+    res.status(500).json({ error: 'Failed to export profile as HTML.', details: err.message });
+  }
+});
 
 module.exports = router;
 module.exports.getFullProfile = getFullProfile;

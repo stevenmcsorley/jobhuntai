@@ -5,7 +5,7 @@ import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 Then('I should see the stats page title', () => {
   cy.get('[data-testid="stats-page-title"]')
     .should('be.visible')
-    .and('contain.text', 'Statistics');
+    .and('contain.text', 'Analytics');
 });
 
 Then('I should see the statistics overview interface', () => {

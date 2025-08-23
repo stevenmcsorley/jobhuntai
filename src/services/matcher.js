@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const Groq = require('groq-sdk');
+const cvVersioning = require('./cvVersioning');
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = 'llama3-8b-8192';
@@ -22,14 +23,16 @@ async function matchJob(knex, job, userId) {
     return { match: false, score: 0, reasons: ['missing-description'] };
   }
 
-  // Get CV from database for specific user
-  const cvData = await knex('cvs').where({ user_id: userId }).first();
-  const cvText = cvData?.content || '';
+  // Get current CV version for matching
+  const cvData = await cvVersioning.getCvForMatching(userId);
+  const cvText = cvData.content;
 
   if (!cvText) {
     console.warn(`⚠️ No CV content found in database for user ${userId}, cannot match.`);
     return { match: false, score: 0, reasons: ['missing-cv'] };
   }
+
+  console.log(`🔍 Using CV version ${cvData.version} for matching`);
 
   // Get test data to integrate with matching for specific user
   const testData = await knex('test_sessions')
@@ -95,7 +98,7 @@ Be extremely precise - only include skills actually mentioned in the CV, not inf
     const result = JSON.parse(chat.choices[0].message.content || '{}');
     console.log(`✅ CV-match result: ${JSON.stringify(result)}`);
 
-    // Prepare enhanced match data
+    // Prepare enhanced match data with CV version info
     const matchData = {
       match: result.match || false,
       score: result.score || 0,
@@ -104,6 +107,8 @@ Be extremely precise - only include skills actually mentioned in the CV, not inf
       suggested_tests: JSON.stringify(result.suggested_tests || []),
       completed_tests: JSON.stringify(result.completed_tests || []),
       key_insights: JSON.stringify(result.key_insights || []),
+      cv_version: cvData.version,
+      cv_content_snapshot: cvText.substring(0, 5000), // Store first 5000 chars for audit
       checked_at: new Date().toISOString()
     };
 
