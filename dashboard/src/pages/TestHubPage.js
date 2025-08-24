@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { AcademicCapIcon, ClockIcon } from '@heroicons/react/24/outline';
@@ -11,11 +12,11 @@ const frameworkDescriptions = {
   'behavioral_soar': 'The SOAR method is a powerful variation of STAR that is excellent for highlighting your problem-solving and resilience skills. Use it to explicitly call out a challenge you faced and how you overcame it.'
 };
 
-const TestConfiguration = ({ onStartTest, topSkills }) => {
+const TestConfiguration = ({ onStartTest, topSkills, initialCustomSkill }) => {
   const [skill, setSkill] = useState(topSkills[0] || 'React');
   const [difficulty, setDifficulty] = useState('Intermediate');
   const [type, setType] = useState('short_answer');
-  const [customSkill, setCustomSkill] = useState('');
+  const [customSkill, setCustomSkill] = useState(initialCustomSkill || '');
 
   const isBehavioral = type.startsWith('behavioral_');
 
@@ -116,7 +117,7 @@ const TestConfiguration = ({ onStartTest, topSkills }) => {
   );
 };
 
-const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions }) => {
+const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions, elapsedTime, formatTime }) => {
   const [answer, setAnswer] = useState('');
 
   const handleSubmit = () => {
@@ -127,10 +128,18 @@ const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, 
   return (
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
-          {session.difficulty !== 'N/A' && (
-            <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
+            {session.difficulty !== 'N/A' && (
+              <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+            )}
+          </div>
+          {elapsedTime !== undefined && (
+            <div className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400">
+              <ClockIcon className="w-4 h-4" />
+              <span className="font-mono">{formatTime(elapsedTime)}</span>
+            </div>
           )}
         </div>
         <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
@@ -166,7 +175,7 @@ const ActiveTestSession = ({ session, question, onAnswerSubmit, questionNumber, 
   );
 };
 
-const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions }) => {
+const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions, elapsedTime, formatTime }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const options = question.options ? JSON.parse(question.options) : [];
 
@@ -182,9 +191,17 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
   return (
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
-          <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
+            <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+          </div>
+          {elapsedTime !== undefined && (
+            <div className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400">
+              <ClockIcon className="w-4 h-4" />
+              <span className="font-mono">{formatTime(elapsedTime)}</span>
+            </div>
+          )}
         </div>
         <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
       </div>
@@ -234,7 +251,7 @@ const MultipleChoiceTestSession = ({ session, question, onAnswerSubmit, question
   );
 };
 
-const CodeChallengeTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions }) => {
+const CodeChallengeTestSession = ({ session, question, onAnswerSubmit, questionNumber, totalQuestions, elapsedTime, formatTime }) => {
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
 
@@ -265,9 +282,17 @@ const CodeChallengeTestSession = ({ session, question, onAnswerSubmit, questionN
   return (
     <div className="surface-card p-6">
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-neutral-200 dark:border-slate-700">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
-          <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-neutral-900 dark:text-gray-100">Topic: {session.skill}</span>
+            <span className="text-sm text-neutral-500 dark:text-gray-300">({session.difficulty})</span>
+          </div>
+          {elapsedTime !== undefined && (
+            <div className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400">
+              <ClockIcon className="w-4 h-4" />
+              <span className="font-mono">{formatTime(elapsedTime)}</span>
+            </div>
+          )}
         </div>
         <span className="text-sm text-neutral-500 dark:text-gray-300">Question {questionNumber} of {totalQuestions}</span>
       </div>
@@ -548,6 +573,7 @@ const PromptMatrix = ({ prompts }) => (
 
 // Main component for the Test Hub
 const TestHubPage = () => {
+  const location = useLocation();
   const [view, setView] = useState('config'); // config, active, results, history, prompts
   const [topSkills, setTopSkills] = useState([]);
   const [session, setSession] = useState(null);
@@ -557,6 +583,26 @@ const TestHubPage = () => {
   const [prompts, setPrompts] = useState({});
   const [questionCount, setQuestionCount] = useState({ current: 0, total: 0 });
   const [isLoading, setIsLoading] = useState(false);
+  const [testStartTime, setTestStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Helper function to format elapsed time
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Timer effect
+  useEffect(() => {
+    let interval;
+    if (view === 'active' && testStartTime) {
+      interval = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - testStartTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [view, testStartTime]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -576,7 +622,9 @@ const TestHubPage = () => {
       }
     };
     fetchInitialData();
-  }, []);
+
+    // Custom skill will be passed to TestConfiguration component via props
+  }, [location.state]);
 
   const handleStartTest = async (config) => {
     setIsLoading(true);
@@ -587,6 +635,8 @@ const TestHubPage = () => {
       setCurrentQuestion(res.data.question);
       setQuestionCount({ current: 1, total: 5 }); // Assuming 5 questions
       setView('active');
+      setTestStartTime(Date.now());
+      setElapsedTime(0);
     } catch (error) {
       toast.error('Failed to start the test session.');
     } finally {
@@ -679,6 +729,8 @@ const TestHubPage = () => {
               onAnswerSubmit={handleAnswerSubmit}
               questionNumber={questionCount.current}
               totalQuestions={questionCount.total}
+              elapsedTime={elapsedTime}
+              formatTime={formatTime}
             />
           );
         }
@@ -709,6 +761,8 @@ const TestHubPage = () => {
                 onAnswerSubmit={handleAnswerSubmit}
                 questionNumber={questionCount.current}
                 totalQuestions={questionCount.total}
+                elapsedTime={elapsedTime}
+                formatTime={formatTime}
               />
             );
           } else {
@@ -720,6 +774,8 @@ const TestHubPage = () => {
                 onAnswerSubmit={handleAnswerSubmit}
                 questionNumber={questionCount.current}
                 totalQuestions={questionCount.total}
+                elapsedTime={elapsedTime}
+                formatTime={formatTime}
               />
             );
           }
@@ -732,6 +788,8 @@ const TestHubPage = () => {
             onAnswerSubmit={handleAnswerSubmit}
             questionNumber={questionCount.current}
             totalQuestions={questionCount.total}
+            elapsedTime={elapsedTime}
+            formatTime={formatTime}
           />
         );
       case 'results':
@@ -744,7 +802,7 @@ const TestHubPage = () => {
         return <PromptMatrix prompts={prompts} />;
       case 'config':
       default:
-        return <TestConfiguration onStartTest={handleStartTest} topSkills={topSkills} />;
+        return <TestConfiguration onStartTest={handleStartTest} topSkills={topSkills} initialCustomSkill={location.state?.customSkill} />;
     }
   };
 

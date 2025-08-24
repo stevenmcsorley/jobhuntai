@@ -16,6 +16,7 @@ const coverLetterGenerator = require('./services/coverLetterGenerator');
 const companyInfoGenerator = require('./services/companyInfoGenerator');
 const testGenerator = require('./services/testGenerator');
 const guidanceGenerator = require('./services/guidanceGenerator');
+const testProgressSync = require('./services/testProgressSync');
 const { asyncHandler, errorHandler } = require('./utils/errorHandler');
 const cvTailor = require('./services/cvTailor');
 const skillExtractor = require('./services/skillExtractor');
@@ -25,6 +26,7 @@ const { runProactiveHunt } = require('./services/proactiveHunter');
 const profileRoutes = require('./api/routes/profile');
 const cvRoutes = require('./api/routes/cv');
 const authRoutes = require('./api/routes/auth');
+const developmentRoutes = require('./api/routes/development');
 const { authenticateToken } = require('./middleware/auth');
 
 const config = require('../config.json');
@@ -35,6 +37,7 @@ app.use(express.json({ limit: '5mb' })); // Increase limit for CV content
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/cv', cvRoutes);
+app.use('/api/development', developmentRoutes);
 
 const PORT = process.env.PORT || 5003;
 
@@ -1063,6 +1066,15 @@ app.post('/api/tests/submit-answer', authenticateToken, async (req, res) => {
                 finalScore = (correctCount / allResults.length) * 100;
             }
             await knex('test_sessions').where({ id: result.session_id }).update({ score: finalScore.toFixed(2) });
+            
+            // Sync test results with learning task progress
+            try {
+                await testProgressSync.updateProgressFromTest(result.session_id, req.user.id);
+                console.log(`🔄 Synced test progress for session ${result.session_id}`);
+            } catch (syncError) {
+                console.error('Error syncing test progress:', syncError);
+                // Don't fail the test completion if sync fails
+            }
         }
 
         res.json({ evaluation, nextQuestion });

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faBriefcase, faStar, faThLarge, faCalendarCheck, faFileAlt, 
-  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut, faSignOutAlt, faUser
+  faChartBar, faBullseye, faCog, faVial, faAngleDoubleLeft, faAngleDoubleRight, faUpload, faGraduationCap, faUserAstronaut, faSignOutAlt, faUser, faBookOpen
 } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ opportunitiesCount = 0, onLogout }) => {
@@ -23,6 +23,7 @@ const Sidebar = ({ opportunitiesCount = 0, onLogout }) => {
     { to: '/interviews', icon: faCalendarCheck, label: 'Interviews', color: 'green' },
     { to: '/stats', icon: faChartBar, label: 'Analytics', color: 'purple' },
     { to: '/market-fit', icon: faBullseye, label: 'Market-Fit', color: 'red' },
+    { to: '/re-education', icon: faBookOpen, label: 'Re-Education', color: 'indigo' },
     { to: '/preferences', icon: faCog, label: 'Preferences', color: 'gray' },
     { to: '/bulk-add', icon: faUpload, label: 'Bulk Add', color: 'orange' },
     { to: '/test', icon: faVial, label: 'Test Hub', color: 'cyan' },

@@ -17,6 +17,7 @@ import MarketFitPage from './pages/MarketFitPage';
 import BulkAddPage from './pages/BulkAddPage';
 import GuidancePage from './pages/GuidancePage';
 import MasterProfilePage from './pages/MasterProfilePage';
+import ReEducationPage from './pages/ReEducationPage';
 import JobAnalysisPage from './pages/JobAnalysisPage';
 import { ThemeContext } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -163,6 +164,7 @@ function AppContent() {
             <Route path="/stats" element={<StatsPage stats={stats} />} />
             <Route path="/interviews" element={<InterviewsPage interviews={interviews} onRefresh={fetchData} />} />
             <Route path="/market-fit" element={<MarketFitPage />} />
+            <Route path="/re-education" element={<ReEducationPage />} />
             <Route path="/bulk-add" element={<BulkAddPage fetchData={fetchData} />} />
             <Route path="/guidance" element={<GuidancePage />} />
             <Route path="/job/:id" element={<JobAnalysisPage onJobUpdate={handleJobUpdate} onApplicationUpdate={handleApplicationUpdate} onMatchComplete={handleMatchResult} />} />
