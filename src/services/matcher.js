@@ -53,21 +53,20 @@ async function matchJob(knex, job, userId) {
       messages: [
         {
           role: 'system',
-          content: `You are an expert CV analysis agent. Analyze the candidate's CV against the job description with complete accuracy. Base your assessment ONLY on what is explicitly stated in the CV - do not infer or assume skills not mentioned.
+          content: `You are an expert CV analysis agent. Analyze the candidate's CV against the job description with complete accuracy. Base your assessment ONLY on what is explicitly stated in the CV - do not infer, assume, or suggest skills not mentioned.
 
-Your analysis must:
-1. Only include skills/experience that are explicitly mentioned in the CV
-2. Identify specific skill gaps (requirements mentioned in job but missing from CV)
-3. Be precise about matches vs mismatches
-4. Provide specific evidence from the CV for each match
-5. For test handling: Only exclude skills from suggested_tests if user scored >60% (passing), include skills that scored ≤60% as they need retaking
-6. For test matching: Use flexible skill matching - "GraphQL" tests relate to "GraphQL" requirements, "API Integration with GraphQL" relates to both "GraphQL" and "API integration" requirements
+STRICT RULES:
+1. ONLY include skills/experience that are explicitly mentioned in the CV text
+2. Do NOT assume or infer related skills (e.g., if CV mentions "API integration" do NOT assume "GraphQL" experience)
+3. Do NOT make creative leaps in key insights - stick to factual CV content
+4. Be precise about what is actually stated vs what is missing
+5. For test handling: Only exclude skills from suggested_tests if user scored >60% (passing)
 
 IMPORTANT: For suggested_tests, recommend skills that are:
-- Relevant to the candidate's industry/role (e.g., marketing professionals should get marketing tests, not programming tests)
+- Missing from the CV but required by the job
 - Actually testable (focus on practical skills like Digital Marketing, SEO, Content Strategy, Data Analysis, Project Management)
-- Appropriate for the job context (fintech marketing = financial knowledge + marketing skills)
-- Industry-agnostic where appropriate (Communication, Leadership, Analytics apply across sectors)`
+- Relevant to the candidate's industry/role
+- Industry-appropriate (avoid suggesting programming tests for non-technical roles)`
         },
         {
           role: 'user',
