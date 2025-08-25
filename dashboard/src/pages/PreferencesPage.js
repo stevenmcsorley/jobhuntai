@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 const PreferencesPage = () => {
   const [preferences, setPreferences] = useState({
@@ -11,10 +11,10 @@ const PreferencesPage = () => {
     radius: '30',
     salary: '£60,000',
     stack_keywords: 'javascript,typescript,react,node.js,python,html,css,git',
-    market_fit_skills: 'JavaScript,TypeScript,React,Node.js,Python,HTML,CSS,Git',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPopulatingFromCV, setIsPopulatingFromCV] = useState(false);
 
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -52,6 +52,23 @@ const PreferencesPage = () => {
     }
   };
 
+  const handlePopulateFromCV = async () => {
+    try {
+      setIsPopulatingFromCV(true);
+      const response = await axios.post('/api/preferences/populate-from-cv');
+      
+      if (response.data) {
+        setPreferences(prev => ({ ...prev, ...response.data }));
+        toast.success('Preferences populated from CV successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to populate from CV. Make sure you have a profile set up.');
+      console.error('Error populating from CV:', error);
+    } finally {
+      setIsPopulatingFromCV(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-full overflow-y-auto scrollbar-modern p-4">
@@ -78,25 +95,49 @@ const PreferencesPage = () => {
                 <p className="text-indigo-100">Configure your job search criteria</p>
               </div>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              data-testid="save-preferences-button"
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-colors ${
-                isSaving
-                  ? 'bg-white/20 cursor-not-allowed text-white/60'
-                  : 'bg-white text-indigo-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white'
-              }`}
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                  Saving...
-                </>
-              ) : (
-                'Save Preferences'
-              )}
-            </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={handlePopulateFromCV}
+                disabled={isPopulatingFromCV}
+                data-testid="populate-from-cv-button"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-colors ${
+                  isPopulatingFromCV
+                    ? 'bg-white/20 cursor-not-allowed text-white/60'
+                    : 'bg-white/10 text-white border-white/20 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white'
+                }`}
+              >
+                {isPopulatingFromCV ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Populating...
+                  </>
+                ) : (
+                  <>
+                    <DocumentTextIcon className="h-4 w-4 mr-2" />
+                    Populate from CV
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                data-testid="save-preferences-button"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-colors ${
+                  isSaving
+                    ? 'bg-white/20 cursor-not-allowed text-white/60'
+                    : 'bg-white text-indigo-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white'
+                }`}
+              >
+                {isSaving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                    Saving...
+                  </>
+                ) : (
+                  'Save Preferences'
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -148,24 +189,6 @@ const PreferencesPage = () => {
               </p>
             </div>
 
-            <div>
-              <label htmlFor="market_fit_skills" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Market-Fit Skills
-              </label>
-              <textarea
-                id="market_fit_skills"
-                name="market_fit_skills"
-                rows="3"
-                value={preferences.market_fit_skills}
-                onChange={handleChange}
-                placeholder="e.g., React,Node.js,Python,AWS"
-                data-testid="market-fit-skills-textarea"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Comma-separated list of skills to track in the Market-Fit Analysis page.
-              </p>
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

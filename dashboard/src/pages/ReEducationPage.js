@@ -478,9 +478,9 @@ const TaskCard = ({ task, onComplete, onStatusChange }) => {
 
   const getStatusText = (task) => {
     if (task.task_type === 'test') {
-      if (task.test_completed && task.test_score >= 70) {
+      if (task.test_completed && task.test_score >= 60) {
         return `passed (${task.test_score}%)`;
-      } else if (task.test_completed && task.test_score < 70) {
+      } else if (task.test_completed && task.test_score < 60) {
         return `failed (${task.test_score}%)`;
       } else {
         return 'not taken';

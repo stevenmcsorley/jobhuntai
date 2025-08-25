@@ -53,7 +53,7 @@ class TestProgressSync {
           test_score: testSession.score,
           test_duration_minutes: testDuration,
           test_taken_at: testSession.completed_at,
-          status: testSession.score >= 70 ? 'completed' : 'completed', // Mark as completed regardless of pass/fail
+          status: testSession.score >= 60 ? 'completed' : 'completed', // Mark as completed regardless of pass/fail
           actual_minutes: testDuration,
           completed_at: testSession.completed_at
         });
@@ -61,7 +61,7 @@ class TestProgressSync {
       console.log(`✅ Updated learning task ${taskToUpdate.id} with test results`);
 
       // Update development progress
-      await this.updateDevelopmentProgress(taskToUpdate.program_id, testSession.skill, testSession.score >= 70);
+      await this.updateDevelopmentProgress(taskToUpdate.program_id, testSession.skill, testSession.score >= 60);
 
       return {
         taskId: taskToUpdate.id,
@@ -113,7 +113,7 @@ class TestProgressSync {
           knex.raw('COUNT(*) as total_tasks'),
           knex.raw('SUM(CASE WHEN learning_tasks.status = "completed" THEN 1 ELSE 0 END) as completed_tasks'),
           knex.raw('SUM(CASE WHEN learning_tasks.test_completed = 1 THEN 1 ELSE 0 END) as tests_taken'),
-          knex.raw('SUM(CASE WHEN learning_tasks.test_score >= 70 THEN 1 ELSE 0 END) as tests_passed'),
+          knex.raw('SUM(CASE WHEN learning_tasks.test_score >= 60 THEN 1 ELSE 0 END) as tests_passed'),
           knex.raw('AVG(learning_tasks.test_score) as avg_test_score'),
           knex.raw('SUM(learning_tasks.actual_minutes) as total_minutes')
         )

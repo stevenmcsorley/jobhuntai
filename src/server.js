@@ -27,6 +27,7 @@ const profileRoutes = require('./api/routes/profile');
 const cvRoutes = require('./api/routes/cv');
 const authRoutes = require('./api/routes/auth');
 const developmentRoutes = require('./api/routes/development');
+const dashboardRoutes = require('./api/routes/dashboard');
 const { authenticateToken } = require('./middleware/auth');
 
 const config = require('../config.json');
@@ -38,6 +39,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/cv', cvRoutes);
 app.use('/api/development', developmentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 const PORT = process.env.PORT || 5003;
 
@@ -213,17 +215,19 @@ app.post('/api/jobs/bulk', authenticateToken, async (req, res) => {
 
 
 // POST /jobs/scrape?source=cwjobs - trigger a new scrape for a specific source
-app.post('/api/jobs/scrape', async (req, res) => {
+app.post('/api/jobs/scrape', authenticateToken, async (req, res) => {
   try {
     const source = req.query.source || 'cwjobs'; // Default to cwjobs
     let adapter;
 
-    // Fetch preferences to build the dynamic URL
-    const prefs = await knex('preferences').select('*');
+    // Fetch preferences for the authenticated user
+    const prefs = await knex('preferences').where({ user_id: req.user.id }).select('*');
     const preferences = prefs.reduce((obj, item) => {
       obj[item.key] = item.value;
       return obj;
     }, {});
+    
+    console.log(`🔍 Scraping for user ${req.user.id} with preferences:`, preferences);
 
     if (source === 'cwjobs') {
       const keywords = encodeURIComponent((preferences.keywords || '').replace(/,/g, ' ').replace(/\s+/g, ' ').trim());
@@ -262,7 +266,7 @@ app.post('/api/jobs/scrape', async (req, res) => {
     }
 
     const stackKeywords = preferences.stack_keywords ? preferences.stack_keywords.split(',').map(k => k.trim().toLowerCase()) : [];
-    const newJobs = await scraper.scrapeAndSave(knex, [adapter], stackKeywords);
+    const newJobs = await scraper.scrapeAndSave(knex, [adapter], stackKeywords, req.user.id);
 
     if (newJobs.length === 0) {
         return res.json({ message: `Cycle complete for ${source}. No new jobs to process.` });
@@ -287,7 +291,10 @@ app.post('/api/jobs/scrape', async (req, res) => {
         job_id: job.id,
         status: 'opportunity',
         applied_at: new Date().toISOString(),
-        meta: JSON.stringify({ note: 'Found by manual scrape.' })
+        updated_at: new Date().toISOString(),
+        user_id: req.user.id,
+        source: source,
+        meta: JSON.stringify({ note: `Found by manual scrape from ${source}.` })
       });
     }
 
@@ -845,16 +852,128 @@ app.get('/api/preferences', authenticateToken, async (req, res) => {
 app.post('/api/preferences', authenticateToken, async (req, res) => {
     try {
         const preferences = req.body;
-        const queries = Object.keys(preferences).map(key => {
+        console.log('Saving preferences for user:', req.user.id, 'Preferences:', preferences);
+        
+        // Filter out undefined/null values and empty keys
+        const validPreferences = Object.keys(preferences)
+            .filter(key => key && key.trim() && preferences[key] !== undefined)
+            .reduce((obj, key) => {
+                obj[key] = preferences[key] || '';
+                return obj;
+            }, {});
+        
+        console.log('Valid preferences after filtering:', validPreferences);
+        
+        const queries = Object.keys(validPreferences).map(key => {
             return knex('preferences')
-                .insert({ key, value: preferences[key], user_id: req.user.id })
+                .insert({ key, value: validPreferences[key], user_id: req.user.id })
                 .onConflict(['key', 'user_id'])
                 .merge();
         });
+        
         await Promise.all(queries);
+        console.log('Preferences saved successfully');
         res.json({ message: 'Preferences updated successfully.' });
     } catch (err) {
+        console.error('Error saving preferences:', err);
         res.status(500).json({ error: 'Failed to save preferences.', details: err.message });
+    }
+});
+
+// POST /api/preferences/populate-from-cv - populate preferences from CV/profile data
+app.post('/api/preferences/populate-from-cv', authenticateToken, async (req, res) => {
+    try {
+        // Helper function to fetch full profile (inline version)
+        const getFullProfile = async (userId) => {
+            const profile = await knex('profiles').where({ user_id: userId }).first();
+            const skills = await knex('skills').where({ user_id: userId }).select('*');
+            const work_experiences = await knex('work_experiences').where({ user_id: userId }).select('*');
+            const experience_highlights = await knex('experience_highlights').select('*');
+            const projects = await knex('projects').where({ user_id: userId }).select('*');
+            const project_highlights = await knex('project_highlights').select('*');
+            const education = await knex('education').where({ user_id: userId }).select('*');
+
+            const experiencesWithHighlights = work_experiences.map(exp => ({
+                ...exp,
+                highlights: experience_highlights.filter(h => h.experience_id === exp.id)
+            }));
+
+            const projectsWithHighlights = projects.map(proj => ({
+                ...proj,
+                highlights: project_highlights.filter(h => h.project_id === proj.id)
+            }));
+
+            return {
+                profile: profile || {},
+                skills: skills || [],
+                work_experiences: experiencesWithHighlights || [],
+                projects: projectsWithHighlights || [],
+                education: education || []
+            };
+        };
+        
+        // Get full profile data for the user
+        const profileData = await getFullProfile(req.user.id);
+        
+        console.log('🔍 Profile data retrieved:', {
+            profile: profileData.profile ? 'exists' : 'missing',
+            skills_count: profileData.skills?.length || 0,
+            skills: profileData.skills?.map(s => s.name || s.skill_name) || [],
+            work_experiences_count: profileData.work_experiences?.length || 0,
+            work_titles: profileData.work_experiences?.map(exp => exp.title) || []
+        });
+        
+        if (!profileData.profile && (!profileData.skills || profileData.skills.length === 0)) {
+            return res.status(400).json({ 
+                error: 'No profile data found. Please set up your profile first.' 
+            });
+        }
+        
+        // Extract preferences from profile data
+        const preferences = {};
+        
+        // Generate keywords from skills and work experience titles
+        const skillKeywords = (profileData.skills || [])
+            .filter(s => (s.name || s.skill_name) && (s.name || s.skill_name).trim())
+            .map(s => s.name || s.skill_name)
+            .slice(0, 10);
+        const workTitles = (profileData.work_experiences || [])
+            .filter(exp => exp.title && exp.title.trim())
+            .map(exp => exp.title)
+            .slice(0, 3);
+        const allKeywords = [...new Set([...skillKeywords, ...workTitles])];
+        preferences.keywords = allKeywords.join(', ');
+        
+        // Generate stack keywords from all skills (let user decide what's relevant)
+        const stackKeywords = (profileData.skills || [])
+            .filter(s => (s.name || s.skill_name) && (s.name || s.skill_name).trim())
+            .map(s => (s.name || s.skill_name).toLowerCase().trim())
+            .slice(0, 15);
+        preferences.stack_keywords = [...new Set(stackKeywords)].join(',');
+        
+        console.log('🏗️ Generated preferences:', {
+            keywords: preferences.keywords,
+            stack_keywords: preferences.stack_keywords,
+            location: preferences.location,
+            town: preferences.town
+        });
+        
+        // Extract location from most recent work experience
+        if (profileData.work_experiences && profileData.work_experiences.length > 0) {
+            const mostRecent = profileData.work_experiences[0];
+            if (mostRecent.location) {
+                preferences.location = mostRecent.location;
+                preferences.town = mostRecent.location.split(',')[0].trim();
+            }
+        }
+        
+        res.json(preferences);
+    } catch (err) {
+        console.error('Error populating preferences from CV:', err);
+        res.status(500).json({ 
+            error: 'Failed to populate preferences from CV.', 
+            details: err.message 
+        });
     }
 });
 
@@ -1034,19 +1153,23 @@ app.post('/api/tests/submit-answer', authenticateToken, async (req, res) => {
         const session = await knex('test_sessions').where({ id: result.session_id }).first();
         const evaluation = await testGenerator.evaluateAnswer(result.question_text, result.correct_answer, answer, session.type);
 
-        let isCorrect, feedback;
+        let isCorrect, feedback, correctAnswer;
         if (session.type.startsWith('behavioral_')) {
             isCorrect = evaluation.overall_score > 60; // Consider >60 a "pass" for behavioral
             feedback = JSON.stringify(evaluation); // Store the whole object
+            correctAnswer = result.correct_answer; // Keep original answer for behavioral
         } else {
             isCorrect = evaluation.is_correct;
             feedback = evaluation.feedback;
+            // Use AI-improved correct answer if available, otherwise keep original
+            correctAnswer = evaluation.correct_answer ? JSON.stringify(evaluation.correct_answer) : result.correct_answer;
         }
 
         await knex('test_results').where({ id: result_id }).update({
             user_answer: answer,
             feedback: feedback,
-            is_correct: isCorrect
+            is_correct: isCorrect,
+            correct_answer: correctAnswer
         });
 
         const nextQuestion = await knex('test_results')
@@ -1126,12 +1249,16 @@ app.post('/api/tests/sessions/:id/reset-incorrect', authenticateToken, async (re
             return res.status(404).json({ error: 'Test session not found.' });
         }
 
+        // Find both incorrect (false) AND unanswered (null) questions to retake
         const incorrectResultIds = await knex('test_results')
-            .where({ session_id: id, is_correct: false })
+            .where({ session_id: id })
+            .andWhere(function() {
+                this.where('is_correct', false).orWhereNull('is_correct');
+            })
             .select('id');
 
         if (incorrectResultIds.length === 0) {
-            return res.status(400).json({ error: 'No incorrect answers to retake in this session.' });
+            return res.status(400).json({ error: 'No incorrect or unanswered questions to retake in this session.' });
         }
 
         await knex('test_results')
@@ -1142,8 +1269,8 @@ app.post('/api/tests/sessions/:id/reset-incorrect', authenticateToken, async (re
                 is_correct: null
             });
         
-        // Also reset the overall score
-        await knex('test_sessions').where({ id }).update({ score: null });
+        // DON'T reset the overall score - let it recalculate when test completes
+        // This preserves the partial score from correctly answered questions
 
         const firstQuestion = await knex('test_results').where({ session_id: id }).whereNull('user_answer').first();
         const totalQuestions = incorrectResultIds.length;
@@ -1248,7 +1375,10 @@ app.get('/api/guidance/:topic', authenticateToken, asyncHandler(async (req, res)
         .join('test_results', 'test_sessions.id', '=', 'test_results.session_id')
         .where('test_sessions.skill', topic)
         .andWhere('test_sessions.user_id', req.user.id)
-        .andWhereNot('test_results.is_correct', true)
+        .andWhere(function() {
+            this.where('test_results.is_correct', false)
+                .orWhereNull('test_results.is_correct');
+        })
         .select('test_results.*', 'test_sessions.completed_at');
 
     if (incorrectResults.length === 0) {

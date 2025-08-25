@@ -11,6 +11,13 @@ import DashboardChart from '../components/DashboardChart';
 import AddJobModal from '../components/AddJobModal';
 import AddInterviewModal from '../components/AddInterviewModal';
 import SkeletonLoader from '../components/SkeletonLoader';
+import {
+  CVMatchPerformanceWidget,
+  JobHuntIntelligenceWidget,
+  InterviewSuccessWidget,
+  CareerProgressionWidget,
+  OpportunityPipelineWidget
+} from '../components/EnhancedDashboardWidgets';
 
 import { faCalendarAlt, faExclamationCircle, faBriefcase } from '@fortawesome/free-solid-svg-icons';
 
@@ -51,13 +58,24 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [stats, setStats] = useState({ appliedToday: 0, appliedThisWeek: 0, applicationsByDay: [] });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [dashboardAnalytics, setDashboardAnalytics] = useState({
+    matchData: {},
+    intelligenceData: {},
+    interviewData: {},
+    progressData: {},
+    pipelineData: {}
+  });
 
 
   useEffect(() => {
     const getStats = async () => {
         try {
-            const statsRes = await axios.get('/api/stats');
+            const [statsRes, analyticsRes] = await Promise.all([
+                axios.get('/api/stats'),
+                axios.get('/api/dashboard/analytics').catch(() => ({ data: {} }))
+            ]);
             setStats(statsRes.data);
+            setDashboardAnalytics(analyticsRes.data);
         } catch (error) {
             console.error("Error fetching stats:", error);
         } finally {
@@ -380,19 +398,36 @@ function DashboardPage({ applications, allJobs, fetchData, onJobUpdate, onMatchC
           progressMessage={progressMessage}
         />
         
-        <Stats
-          jobsFound={allJobs.length}
-          appliedCount={appliedJobs.length}
-          followupCount={followupJobs.length}
-          appliedToday={stats.appliedToday}
-          appliedThisWeek={stats.appliedThisWeek}
-        />
-        
-        <div className="surface-card p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Application Trends</h3>
-            <div style={{ height: '350px' }}>
-              <DashboardChart data={stats.applicationsByDay} />
+        {/* Enhanced Dashboard Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+          <CVMatchPerformanceWidget matchData={dashboardAnalytics.matchData} />
+          <JobHuntIntelligenceWidget intelligenceData={dashboardAnalytics.intelligenceData} />
+          <InterviewSuccessWidget interviewData={dashboardAnalytics.interviewData} />
+          <CareerProgressionWidget progressData={dashboardAnalytics.progressData} />
+          <OpportunityPipelineWidget pipelineData={dashboardAnalytics.pipelineData} />
+          
+          {/* Keep basic stats as a smaller widget */}
+          <div className="surface-card p-6">
+            <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4 flex items-center space-x-2">
+              <span>Quick Stats</span>
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Jobs Found</span>
+                <span className="font-bold text-neutral-900 dark:text-white">{allJobs.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Applied</span>
+                <span className="font-bold text-neutral-900 dark:text-white">{appliedJobs.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Need Follow-up</span>
+                <span className="font-bold text-neutral-900 dark:text-white">{followupJobs.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">Applied Today</span>
+                <span className="font-bold text-neutral-900 dark:text-white">{stats.appliedToday}</span>
+              </div>
             </div>
           </div>
         </div>
