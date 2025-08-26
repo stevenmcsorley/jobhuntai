@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { safeJsonParse } from './utils/jsonUtils';
+import { safeDataParse } from './utils/jsonUtils';
 import Sidebar from './components/Sidebar';
 import CommandPalette from './components/CommandPalette';
 import FloatingActionButton from './components/FloatingActionButton';
@@ -125,7 +125,7 @@ function AppContent() {
       ...app,
       job_id: job.id, // Explicitly set job_id from the job object
       id: app.id,     // Explicitly set id from the application object
-      reasons: safeJsonParse(match.reasons, [], 'match.reasons')
+      reasons: safeDataParse(match.reasons, [], 'match.reasons')
     };
     return combined;
   });

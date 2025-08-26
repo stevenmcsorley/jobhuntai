@@ -86,7 +86,10 @@ app.get('/api/jobs/:id', authenticateToken, async (req, res) => {
     const combinedData = {
       ...job,
       ...parsedMatchResult,
-      ...(application || {})
+      ...(application || {}),
+      // Ensure job fields take precedence over application fields for key identifiers
+      id: job.id,
+      job_id: job.id
     };
     
     res.json(combinedData);
@@ -523,6 +526,20 @@ app.get('/api/applications', authenticateToken, async (req, res) => {
     try {
         const applications = await knex('applications').where({ user_id: req.user.id }).select('*');
         res.json(applications);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// GET /api/applications/:id - get single application for authenticated user
+app.get('/api/applications/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const application = await knex('applications').where({ id, user_id: req.user.id }).first();
+        if (!application) {
+            return res.status(404).json({ error: 'Application not found' });
+        }
+        res.json(application);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

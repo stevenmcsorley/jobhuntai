@@ -50,16 +50,11 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
   };
 
   useEffect(() => {
-    if (location.state?.jobData) {
-      // Use the job data passed via navigation state
-      setJob(location.state.jobData);
-      setLoading(false);
-    } else {
-      // Fallback to fetching if no state data (direct URL access)
-      fetchJobDetails();
-    }
+    // Always fetch fresh data to ensure we have the latest generated content
+    // The navigation state might have stale data that doesn't include match results
+    fetchJobDetails();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, location.state]);
+  }, [id]);
 
   useEffect(() => {
     setEditableDescription(job?.description || '');
@@ -73,24 +68,42 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
     try {
       setLoading(true);
       
-      // First get the application data
-      const appRes = await axios.get(`/api/applications/${id}`);
-      const appData = appRes.data;
-      
-      if (!appData || !appData.job_id) {
-        throw new Error('Application not found');
-      }
-      
-      // Get job with all associated match data using the new endpoint
-      const jobRes = await axios.get(`/api/jobs/${appData.job_id}`);
-      const jobData = jobRes.data;
+      // Try to get job data directly first (assumes id is a job ID)
+      try {
+        const jobRes = await axios.get(`/api/jobs/${id}`);
+        const jobData = jobRes.data;
+        setJob(jobData);
+        return;
+      } catch (jobError) {
+        // If job doesn't exist, try as application ID
+        if (jobError.response?.status === 404) {
+          console.log(`Job ${id} not found, trying as application ID...`);
+          
+          // Get application data first
+          const appRes = await axios.get(`/api/applications/${id}`);
+          const appData = appRes.data;
+          
+          if (!appData || !appData.job_id) {
+            throw new Error('Application not found');
+          }
+          
+          // Get job data using job_id from application
+          const jobRes = await axios.get(`/api/jobs/${appData.job_id}`);
+          const jobData = jobRes.data;
 
-      setJob({
-        ...jobData,
-        ...appData,
-        job_id: jobData.id,
-        id: appData.id
-      });
+          // Combine job and application data
+          const combinedJob = {
+            ...jobData,
+            ...appData,
+            job_id: jobData.id,
+            id: appData.id  // Keep application ID as the main ID
+          };
+
+          setJob(combinedJob);
+          return;
+        }
+        throw jobError;
+      }
     } catch (error) {
       console.error('Error fetching job details:', error);
       toast.error('Failed to load job details');
@@ -368,6 +381,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
   // eslint-disable-next-line no-unused-vars
   const matchResult = job;
 
+
   return (
     <div className="h-full overflow-y-auto scrollbar-modern p-4 animate-fade-in">
       <div className="max-w-screen-2xl mx-auto space-y-responsive">
@@ -436,6 +450,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
           <div className="flex items-center justify-end mb-6" data-testid="status-updater-section">
             <StatusUpdater application={job} onUpdate={handleLocalApplicationUpdate} />
           </div>
+
 
           {/* Tab Content */}
           {activeTab === 'description' && (
@@ -713,7 +728,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                   </>
                 ) : 'Generate Interview Prep'}
               </button>
-              {interviewPrep && (
+              {interviewPrep !== null && (
                 <div className="space-y-4">
                   <div className="bg-neutral-50 dark:bg-neutral-800 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700" data-testid="company-overview-section">
                     <h6 className="font-semibold mb-2 text-neutral-900 dark:text-neutral-100">Company Overview</h6>
@@ -758,7 +773,7 @@ const JobAnalysisPage = ({ onJobUpdate, onApplicationUpdate, onMatchComplete }) 
                   </>
                 ) : 'Generate Cover Letter'}
               </button>
-              {coverLetter && (
+              {coverLetter && coverLetter.trim() !== '' && (
                 <textarea
                   className="w-full h-96 p-4 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 resize-none font-mono text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                   value={coverLetter}
